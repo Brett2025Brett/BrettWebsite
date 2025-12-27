@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brett-Onlinetools</title>
+  <style>
+    :root {
+      --primary: #ff7043;
+      --primary-dark: #e64a19;
+      --bg-light: #f9f9f9;
+      --bg-dark: #333;
+      --text-light: #333;
+      --text-dark: #f9f9f9;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--bg-light);
+      color: var(--text-light);
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    header {
+      background-color: var(--primary);
+      color: white;
+      text-align: center;
+      padding: 40px 20px;
+      border-bottom: 4px solid var(--primary-dark);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 3rem;
+    }
+
+    main {
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    .tool-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      margin-top: 30px;
+    }
+
+    .tool-list a {
+      flex: 1 1 220px;
+      text-decoration: none;
+      background-color: #fff;
+      color: var(--text-light);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      text-align: center;
+      font-weight: bold;
+      transition: transform 0.2s, background-color 0.3s;
+    }
+
+    .tool-list a:hover {
+      background-color: #ffe0d3;
+      transform: scale(1.03);
+    }
+
+    footer {
+      background-color: var(--bg-dark);
+      color: white;
+      text-align: center;
+      padding: 20px;
+      margin-top: 60px;
+    }
+
+    .dark-mode-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    body.dark-mode {
+      background-color: var(--bg-dark);
+      color: var(--text-dark);
+    }
+
+    body.dark-mode .tool-list a {
+      background-color: #444;
+      color: var(--text-dark);
+    }
+
+    body.dark-mode .tool-list a:hover {
+      background-color: #555;
+    }
+
+    @media (max-width: 600px) {
+      header h1 {
+        font-size: 2rem;
+      }
+      .tool-list a {
+        flex: 1 1 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <button class="dark-mode-toggle" onclick="document.body.classList.toggle('dark-mode')">🌓</button>
+
+  <header>
+    <h1>Brett-Onlinetools</h1>
+  </header>
+
+  <main>
+    <section class="tool-list">
+      <a href="Online_Tools/BrettWarp.html">Brett-Warp</a>
+      <a href="Online_Tools/URLShort.html">URL-Kürzer & QR-Generator</a>
+      <a href="Online_Tools/UNICODEDASHBOARD.html">Unicode-Dashboard</a>
+      <a href="Online_Tools/PasswortRandom.html">Passwortgenerator</a>
+      <a href="Online_Tools/SuperRandom.html">Zufallsstringgenerator</a>
+      <a href="Online_Tools/apkPremium.html">XAPK zu APK Konverter</a>
+ 
+      <a href="Online_Tools/BrettHTMLeditor.html">BrettHTMLeditor</a>
+      <a href="Online_Tools/BrettHTML/start.html">HTML Editor</a>
+    </section>
+  </main>
+
+  
+</body>
+</html>
