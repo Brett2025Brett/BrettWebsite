@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <h1>PasswortRandom</h1>
+    <p>Der sicherste Passwortgenerator der Welt</p>
+    <label for="anzahlderzeichen">Anzahl der Zeichen:</label>
+    <label for="menu">Wähle eine Option:</label>
+<select id="anzahlderzeichen" name="anzahlderzeichen">
+ <option value="1">Ein-Zeichen-Passwort (nicht empfohlen)</option>
+ <option value="4">Schülerpasswort</option>
+  <option value="8">Genügende Sicherheit</option>
+  <option value="12">Mittelmäßige Sicherheit</option>
+  <option value="18">Gute Sicherheit</option>
+  <option value="22">Sehr Gute Sicherheit</option>
+  <option value="30">Extrem Gute Sicherheit</option>
+  <option value="35">Übermäßig Gute Sicherheit</option>
+  <option value="40">Buisness-Server Sicherheit</option>
+  <option value="50">Buisness-Cloud Sicherheit</option>
+  <option value="50">Laufwerksverschlüsselungskey</option>
+  <option value="80">BitLockser-Laufwerkswiederherstellungsschlüssel</option>
+  <option value="100">Anti-Hack-Passwort</option>
+  <option value="1000">Sehr starker Verschlüsselungskey</option>
+
+</select>
+
+    <button type="button" onclick="generate();">Generieren</button>
+    <br>
+    <textarea id="ergebnistext" rows="10" cols="150" style="resize: none;">Hier erscheint das Ergebnis!</textarea>
+    <script>
+        function generate() {
+                        let result = '';
+            const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!?_+#";
+            const charactersLength = characters.length;
+            const anzahlderzeichen = document.getElementById('anzahlderzeichen').value;
+            let counter = 0;
+            while (counter < anzahlderzeichen) {
+                result += characters.charAt(Math.floor(Math.random() * charactersLength));
+                counter += 1;
+            }
+            document.getElementById('ergebnistext').value = result;
+
+        }
+    </script>
+</body>
+</html>

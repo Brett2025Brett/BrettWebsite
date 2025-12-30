@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>BrettHTMLeditor Pro</title>
+  <style>
+    :root {
+      --bg-color: #1e1e2f;
+      --panel-color: #2e2e3e;
+      --text-color: #f0f0f0;
+      --accent-color: #00bcd4;
+      --border-radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    header {
+      background-color: var(--panel-color);
+      padding: 20px;
+      text-align: center;
+      border-bottom: 1px solid #444;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 24px;
+      color: var(--accent-color);
+    }
+
+    header p {
+      margin-top: 5px;
+      font-size: 14px;
+      color: #ccc;
+    }
+
+    main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    textarea {
+      width: 50%;
+      background-color: var(--panel-color);
+      color: var(--text-color);
+      border: none;
+      padding: 20px;
+      font-size: 16px;
+      font-family: 'Courier New', monospace;
+      resize: none;
+      outline: none;
+      border-right: 1px solid #444;
+    }
+
+    iframe {
+      width: 50%;
+      border: none;
+      background-color: white;
+    }
+
+    footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      font-size: 12px;
+      background-color: var(--panel-color);
+      border-top: 1px solid #444;
+      color: #888;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    button {
+      background-color: var(--accent-color);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #0097a7;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>BrettHTMLeditor Pro</h1>
+    <p>Live-Vorschau, Datei speichern & URL kopieren</p>
+  </header>
+
+  <main>
+    <textarea id="htmlInput" placeholder="Gib hier deinen HTML-Code ein..."></textarea>
+    <iframe id="preview"></iframe>
+  </main>
+
+  <footer>
+    <span>© 2025 BrettHTMLeditor</span>
+    <div class="buttons">
+      <button id="saveBtn">💾 Speichern</button>
+      <button id="copyUrlBtn">🔗 URL kopieren</button>
+    </div>
+  </footer>
+
+  <script>
+    const input = document.getElementById('htmlInput');
+    const preview = document.getElementById('preview');
+    const saveBtn = document.getElementById('saveBtn');
+    const copyUrlBtn = document.getElementById('copyUrlBtn');
+
+    // Vorschau aktualisieren
+    input.addEventListener('input', () => {
+      preview.srcdoc = input.value;
+    });
+
+    // Speichern als Datei
+    saveBtn.addEventListener('click', () => {
+      const htmlContent = input.value;
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'brettHTMLeditor.html';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // URL kopieren
+    copyUrlBtn.addEventListener('click', () => {
+      const encoded = encodeURIComponent(input.value);
+      const dataUrl = `data:text/html;charset=utf-8,${encoded}`;
+      navigator.clipboard.writeText(dataUrl)
+        .then(() => alert('Data-URL wurde kopiert!'))
+        .catch(() => alert('Fehler beim Kopieren der URL.'));
+    });
+
+    // Beispielinhalt beim Start
+    input.value = `
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Beispielseite</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background-color: #f9f9f9; }
+    h1 { color: #00bcd4; }
+  </style>
+</head>
+<body>
+  <h1>Willkommen bei BrettHTMLeditor Pro!</h1>
+  <p>Bearbeite den HTML-Code links und sieh die Vorschau rechts.</p>
+</body>
+</html>
+    `;
+    preview.srcdoc = input.value;
+  </script>
+</body>
+</html>

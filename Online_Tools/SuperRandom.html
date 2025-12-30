@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <h1>SuperRandom</h1>
+    <p>Mit diesem Tool können Sie ganz einfach eine komplett zufällige Kombination aus Zeichen erstellen!</p>
+    <label for="anzahlderzeichen">Anzahl der Zeichen:</label>
+    <input type="number" id="anzahlderzeichen">
+    <button type="button" onclick="generate();">Generieren</button>
+    <br>
+<textarea rows="5"cols="40"id="Zeichen">ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789</textarea>
+<br>
+    <textarea id="ergebnistext" rows="50" cols="150" style="resize: none;">Hier erscheint das Ergebnis!</textarea>
+    <script>
+        function generate() {
+                        let result = '';
+            const characters = Zeichen.value;
+            const charactersLength = characters.length;
+            const anzahlderzeichen = document.getElementById('anzahlderzeichen').value;
+            let counter = 0;
+            while (counter < anzahlderzeichen) {
+                result += characters.charAt(Math.floor(Math.random() * charactersLength));
+                counter += 1;
+            }
+            document.getElementById('ergebnistext').value = result;
+
+        }
+    </script>
+</body>
+</html>

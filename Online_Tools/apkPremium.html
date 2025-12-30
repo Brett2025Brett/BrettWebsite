@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>XAPK zu APK Konverter</title>
+</head>
+<body>
+  <h2>XAPK zu APK Konvertieren kostenlos</h2>
+  <p>WICHTIG: Verwenden sie den Konverter nur für Persönliche Zwecke und hosten sie die resultierten apk dateien nicht.</p>
+  <input type="file" id="xapkInput" accept=".xapk" />
+  <p id="status"></p>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.0/jszip.min.js"></script>
+  <script>
+    document.getElementById('xapkInput').addEventListener('change', async function(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      document.getElementById('status').textContent = 'Lade und entpacke...';
+
+      try {
+        const zip = await JSZip.loadAsync(file);
+        const apkFile = Object.values(zip.files).find(f => f.name.endsWith('.apk'));
+
+        if (!apkFile) {
+          document.getElementById('status').textContent = 'Keine APK-Datei gefunden.';
+          return;
+        }
+
+        const apkBlob = await apkFile.async('blob');
+        const apkUrl = URL.createObjectURL(apkBlob);
+
+        const downloadLink = document.createElement('a');
+        downloadLink.href = apkUrl;
+        downloadLink.download = apkFile.name;
+        downloadLink.textContent = 'APK herunterladen';
+        document.body.appendChild(downloadLink);
+
+        document.getElementById('status').textContent = 'APK extrahiert!';
+      } catch (err) {
+        document.getElementById('status').textContent = 'Fehler beim Entpacken: ' + err.message;
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="de">
+<body>
+<h1>URL Laden</h1>
+<hr>
+<p>Mit dieser Seite können sie einen vorher kopierten Quelltextcode in den Editor laden.</p>
+<input type="text" id="FELD" ></input>
+<button type="button" onclick="loadUrl();">Laden</button>
+<button type="button" onclick="window.open('start.html');">Zurück</button>
+</body>
+<script>
+
+
+function loadUrl() {
+    var feld = document.getElementById("FELD").value;
+    if (feld.trim() !== "") {
+        window.open("Editor.html?text=" + feld);
+    }
+}
+</script>
+</html>
