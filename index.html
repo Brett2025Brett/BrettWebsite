@@ -203,7 +203,7 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 </div>
 <p>Alle Seiten dieser Website :Copyright © 2025 brett website</p><p>ALLE SOURCES DIESER REPOSTORY SIND OPEN SOURCE!</p>
 <div class="container">
-<strong><b>Bitte warten sie</strong></b><div id="countdown">20</div><p>Sekunden</p>
+<strong><b>Bitte warten sie</strong></b><div id="countdown">10</div><p>Sekunden</p>
 <b><strong>WENN SIE AUF FORTFAHREN KLICKEN, STIMMEN SIE DEN VERTRAG ZU ! DIE SEITE WIRD IM NEUEN TAB GELADEN.<strong><b>
 <button id="actionBtn" class="btn" onclick="window.open('MAINui.html')" disabled>FORTFAHREN</button>
 
@@ -212,7 +212,7 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
     
 
 <script>
-let timeLeft = 20;
+let timeLeft = 10;
 const countdownEl = document.getElementById("countdown");
 const actionBtn = document.getElementById("actionBtn");
 
@@ -225,7 +225,7 @@ const timer = setInterval(() => {
 
         // Button aktivieren
         actionBtn.disabled = false;
-        actionBtn.textContent = "WENN SIE SICH ABSOLUT SICCHER SIND,KLICKEN SIE HIER.";
+        actionBtn.textContent = "FORTFAHREN";
     }
 }, 1000);
 
@@ -236,6 +236,7 @@ const timer = setInterval(() => {
 
 </body>
 </html>
+
 
 
 
