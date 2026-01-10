@@ -131,16 +131,27 @@
       display: flex;
       padding: 10px;
     }
+	  .styled-button:hover {
+      background: #e64a19;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+      transform: scale(1.05);
+    } 
   </style>
 </head>
-  <div class="navbar">
+ <div class="navbar">
 <img src="Alt/ICON_MAIN.png" alt="Beim Laden des Bildes ist ein Fehler aufgetreten." height="112" length="100"></img>
-    <button onclick="loadPage('downloadcenter.html')">Downloadcenter</button>
-    <button onclick="loadPage('Online-tools.html')">Onlinetools</button>
-     <button onclick="loadPage('Brett_Lernen.html')">Multi-Sprachen-Editor</button>
-    <button onclick="loadPage('Lizenz.html')">Lizenz</button>
+   <button class="styled-button" onclick="window.location.href='downloadcenter.html'">Downloadcenter</button>
+    <button class="styled-button" onclick="window.location.href='Online-tools.html'">Onlinetools</button>
+     <button class="styled-button" onclick="window.location.href='Brett_Lernen.html'">Multi-Sprachen-Editor</button>
+    <button class="styled-button" onclick="window.location.href='Lizenz.html'">Lizenz</button>
      </div>
-<body>
+
+  <script>
+    function loadPage(url) {
+      document.getElementById('contentFrame').src = url;
+    }
+  </script>
+
   <header>
     <h1>BRETT Downloadcenter</h1>
     <p>Deine Ideen digital downloaden</p>
@@ -418,5 +429,6 @@
 </body>
 </body>
 </html>
+
 
 
