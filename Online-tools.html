@@ -111,9 +111,31 @@
       .tool-list a {
         flex: 1 1 100%;
       }
+    .navbar {
+      background-color: #333;
+      overflow: hidden;
+      display: flex;
+      padding: 10px;
     }
   </style>
 </head>
+  <body>
+
+  <div class="navbar">
+<img src="Alt/ICON_MAIN.png" alt="Beim Laden des Bildes ist ein Fehler aufgetreten." height="112" length="100"></img>
+   <button class="styled-button" onclick="window.location.href='downloadcenter.html'">Downloadcenter</button>
+    <button class="styled-button" onclick="window.location.href='Online-tools.html'">Onlinetools</button>
+     <button class="styled-button" onclick="window.location.href='Brett_Lernen.html'">Multi-Sprachen-Editor</button>
+    <button class="styled-button" onclick="window.location.href='Lizenz.html'">Lizenz</button>
+     </div>
+
+  <script>
+    function loadPage(url) {
+      document.getElementById('contentFrame').src = url;
+    }
+  </script>
+
+</body>
 <body>
 
   <button class="dark-mode-toggle" onclick="document.body.classList.toggle('dark-mode')">🌓</button>
@@ -137,5 +159,6 @@
   
 </body>
 </html>
+
 
 
