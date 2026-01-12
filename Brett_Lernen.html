@@ -4,7 +4,23 @@
   <meta charset="UTF-8" />
   <title>Brett Lernen – Multi-Sprachen Playground</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+<body>
 
+  <div class="navbar">
+<img src="Alt/ICON_MAIN.png" alt="Beim Laden des Bildes ist ein Fehler aufgetreten." height="112" length="100"></img>
+   <button class="download-button" onclick="window.location.href='downloadcenter.html'">Downloadcenter</button>
+    <button class="download-button" onclick="window.location.href='Online-tools.html'">Onlinetools</button>
+     <button class="download-button" onclick="window.location.href='Brett_Lernen.html'">Multi-Sprachen-Editor</button>
+    <button class="download-button" onclick="window.location.href='Lizenz.html'">Lizenz</button>
+     </div>
+
+  <script>
+    function loadPage(url) {
+      document.getElementById('contentFrame').src = url;
+    }
+  </script>
+
+</body>
   <!-- Brython für Python -->
   <script src="https://cdn.jsdelivr.net/npm/brython@3.11.0/brython.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/brython@3.11.0/brython_stdlib.js"></script>
@@ -57,28 +73,28 @@
       display: flex;
       padding: 10px;
     }
+    .download-button {
+      padding: 15px 30px;
+      background-color: #ff7043;
+      color: white;
+      font-size: 1rem;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .download-button:hover {
+      background-color: #e64a19;
+      transform: scale(1.05);
+    }
   </style>
  
 </head>
   <body onload="brython()">
 
-<body>
 
-  <div class="navbar">
-<img src="Alt/ICON_MAIN.png" alt="Beim Laden des Bildes ist ein Fehler aufgetreten." height="112" length="100"></img>
-   <button class="styled-button" onclick="window.location.href='downloadcenter.html'">Downloadcenter</button>
-    <button class="styled-button" onclick="window.location.href='Online-tools.html'">Onlinetools</button>
-     <button class="styled-button" onclick="window.location.href='Brett_Lernen.html'">Multi-Sprachen-Editor</button>
-    <button class="styled-button" onclick="window.location.href='Lizenz.html'">Lizenz</button>
-     </div>
-
-  <script>
-    function loadPage(url) {
-      document.getElementById('contentFrame').src = url;
-    }
-  </script>
-
-</body>
 
 
   <h1>Brett Lernen – Multi-Sprachen Playground</h1>
@@ -227,6 +243,7 @@ document["runPythonBtn"].bind("click", run_python)
 
 </body>
 </html>
+
 
 
 
