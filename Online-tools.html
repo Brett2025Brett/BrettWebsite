@@ -137,25 +137,48 @@
       .tool-list a {
         flex: 1 1 100%;
     }
-    
+ .login-btn {
+  position: fixed;        /* bleibt oben rechts */
+  top: 20px;
+  right: 20px;
+  font-size: 28px;
+  color: white;
+  background: #007bff;
+  padding: 12px;
+  border-radius: 50%;
+  text-decoration: none;
+  transition: 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.login-btn:hover {
+  background: #0056b3;
+  transform: scale(1.1);
+}
   </style>
 </head>
+
 <body>
- <div class="navbar">
+
+  <div class="navbar">
 <img src="Bilder/Brett Lopo neu.png" alt="Beim Laden des Bildes ist ein Fehler aufgetreten." height="112" length="100"></img>
    <button class="download-button" onclick="window.location.href='downloadcenter.html'">Downloadcenter</button>
     <button class="download-button" onclick="window.location.href='Online-tools.html'">Onlinetools</button>
     <button class="download-button" onclick="window.location.href='Lizenz.html'">Lizenz</button>
+    <link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<a href="brett_accunts%20-%20Kopie/logonUI.html" class="login-btn">
+  <i class="fa-solid fa-user"></i>
+</a>
      </div>
 
   <script>
     function loadPage(url) {
       document.getElementById('contentFrame').src = url;
-    }
+    
   </script>
 
 </body>
-<body>
 
   <button class="dark-mode-toggle" onclick="document.body.classList.toggle('dark-mode')">🌓</button>
 
@@ -178,6 +201,7 @@
   
 </body>
 </html>
+
 
 
 
