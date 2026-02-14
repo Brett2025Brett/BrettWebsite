@@ -160,17 +160,17 @@ body {
 
 <!-- SCRIPT -->
 <script type="module">
-import { getSession, logout as authLogout } from "/auth.js";
+import { getSession, logout as authLogout } from "/BrettWebsite/auth.js";
 
 async function checkSession() {
   try {
     const session = await getSession();
     if (!session) {
-      window.location.href = "/logonUI.html";
+      window.location.href = "/BrettWebsite/logonUI.html";
     }
   } catch (err) {
     console.error("Fehler beim Laden der Session:", err);
-    window.location.href = "/logonUI.html";
+    window.location.href = "/BrettWebsite/logonUI.html";
   }
 }
 
@@ -178,7 +178,7 @@ async function checkSession() {
 document.querySelector(".logout-btn").addEventListener("click", async () => {
   try {
     await authLogout();
-    window.location.href = "/logonUI.html";
+    window.location.href = "/BrettWebsite/logonUI.html";
   } catch (err) {
     console.error("Fehler beim Logout:", err);
     alert("Logout fehlgeschlagen!");
