@@ -28,3 +28,13 @@ export async function getSession() {
   const { data } = await supabase.auth.getSession();
   return data.session;
 }
+// auth.js
+export async function getSession() {
+  return localStorage.getItem("loggedIn") === "true";
+}
+
+export async function logout() {
+  localStorage.removeItem("loggedIn");
+}
+
+
