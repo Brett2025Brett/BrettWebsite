@@ -134,7 +134,7 @@ body {
 
   <div class="topbar">
     <h1>Willkommen im Dashboard</h1>
-    <button class="logout-btn" onclick="logout()">Abmelden</button>
+    <button class="logout-btn">Abmelden</button>
   </div>
 
   <div class="cards">
@@ -158,25 +158,35 @@ body {
 
 </div>
 
+<!-- SCRIPT -->
 <script type="module">
 import { getSession, logout as authLogout } from "/auth.js";
 
 async function checkSession() {
-  const session = await getSession();
-  if (!session) {
+  try {
+    const session = await getSession();
+    if (!session) {
+      window.location.href = "/logonUI.html";
+    }
+  } catch (err) {
+    console.error("Fehler beim Laden der Session:", err);
     window.location.href = "/logonUI.html";
   }
 }
 
-window.logout = async function() {
-  await authLogout();
-  window.location.href = "/logonUI.html";
-}
+// Logout Button Event Listener
+document.querySelector(".logout-btn").addEventListener("click", async () => {
+  try {
+    await authLogout();
+    window.location.href = "/logonUI.html";
+  } catch (err) {
+    console.error("Fehler beim Logout:", err);
+    alert("Logout fehlgeschlagen!");
+  }
+});
 
 checkSession();
 </script>
 
 </body>
 </html>
-
-
