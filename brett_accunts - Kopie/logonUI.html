@@ -2,62 +2,81 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>BRETT Login</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BRETT | Login</title>
+
 <style>
 body {
-  font-family: Arial;
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg,#ff7043,#e64a19);
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background: #f5f5f5;
 }
-.box {
+
+.card {
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(20px);
+  padding: 40px;
   width: 350px;
-  padding: 30px;
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  border-radius: 20px;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+  text-align: center;
+  color: white;
 }
+
+.card h2 {
+  margin-bottom: 30px;
+}
+
 input {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   margin-bottom: 15px;
+  border: none;
+  border-radius: 10px;
+  outline: none;
 }
+
 button {
   width: 100%;
-  padding: 10px;
-  background: #ff7043;
+  padding: 12px;
   border: none;
-  color: white;
+  border-radius: 50px;
+  background: white;
+  color: #e64a19;
+  font-weight: bold;
   cursor: pointer;
+  transition: 0.3s;
 }
+
+button:hover {
+  transform: scale(1.05);
+}
+
 a {
   display: block;
-  text-align: center;
   margin-top: 15px;
+  color: white;
+  text-decoration: none;
 }
 </style>
 </head>
+
 <body>
 
-<div class="box">
-<h2>Login</h2>
+<div class="card">
+  <h2>BRETT Login</h2>
 
-<input type="email" placeholder="E-Mail">
-<input type="password" placeholder="Passwort">
+  <input type="email" placeholder="E-Mail">
+  <input type="password" placeholder="Passwort">
 
-<button onclick="login()">Anmelden</button>
+  <button onclick="window.location.href='dashboard.html'">Anmelden</button>
 
-<a href="/BrettWebsite/register.html">Noch kein Konto? Registrieren</a>
+  <a href="register.html">Noch kein Konto? Registrieren</a>
 </div>
-
-<script>
-function login() {
-  // Hier später echte Auth
-  window.location.href = "/BrettWebsite/dashboard.html";
-}
-</script>
 
 </body>
 </html>
