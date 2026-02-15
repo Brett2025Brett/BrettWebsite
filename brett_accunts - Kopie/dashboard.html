@@ -2,190 +2,56 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BRETT | Dashboard</title>
-
-<link rel="icon" href="/Bilder/Brett Lopo neu.png">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
+<title>BRETT Dashboard</title>
 <style>
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  font-family: 'Segoe UI', sans-serif;
-}
-
 body {
+  font-family: Arial;
+  margin: 0;
   display: flex;
-  height: 100vh;
-  background: linear-gradient(135deg, #ff7043, #e64a19);
-  color: white;
 }
-
-/* SIDEBAR */
 .sidebar {
-  width: 250px;
-  background: rgba(0,0,0,0.3);
-  backdrop-filter: blur(10px);
-  padding: 30px 20px;
-  display: flex;
-  flex-direction: column;
+  width: 220px;
+  background: #333;
+  color: white;
+  height: 100vh;
+  padding: 20px;
 }
-
-.sidebar h2 {
-  margin-bottom: 30px;
-  text-align: center;
-}
-
 .sidebar button {
-  background: rgba(255,255,255,0.2);
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  background: #ff7043;
   border: none;
   color: white;
-  padding: 12px;
-  margin-bottom: 15px;
-  border-radius: 10px;
   cursor: pointer;
-  transition: 0.3s;
 }
-
-.sidebar button:hover {
-  background: rgba(255,255,255,0.35);
-  transform: translateX(5px);
-}
-
-/* MAIN */
 .main {
   flex: 1;
   padding: 40px;
-  overflow-y: auto;
-}
-
-.topbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 40px;
-}
-
-.logout-btn {
-  background: white;
-  color: #e64a19;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 30px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: 0.3s;
-}
-
-.logout-btn:hover {
-  transform: scale(1.05);
-}
-
-/* CARDS */
-.cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
-}
-
-.card {
-  background: rgba(255,255,255,0.15);
-  backdrop-filter: blur(15px);
-  padding: 25px;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-  transition: 0.3s;
-  cursor: pointer;
-}
-
-.card:hover {
-  transform: translateY(-5px);
 }
 </style>
 </head>
-
 <body>
 
-<!-- SIDEBAR -->
 <div class="sidebar">
-  <h2>BRETT</h2>
-
-  <button onclick="window.location.href='/BrettWebsite/index.html'">
-    <i class="fa-solid fa-chart-line"></i> Übersicht
-  </button>
-
-  <button onclick="window.location.href='/BrettWebsite/downloadcenter.html'">
-    <i class="fa-solid fa-download"></i> Downloadcenter
-  </button>
-
-  <button onclick="window.location.href='/BrettWebsite/Online-tools.html'">
-    <i class="fa-solid fa-wrench"></i> Online Tools
-  </button>
-
-  <button onclick="window.location.href='/BrettWebsite/Lizenz.html'">
-    <i class="fa-solid fa-key"></i> Lizenz
-  </button>
+  <button onclick="go('downloadcenter.html')">Downloadcenter</button>
+  <button onclick="go('Online-tools.html')">Online Tools</button>
+  <button onclick="go('Lizenz.html')">Lizenz</button>
+  <button onclick="logout()">Logout</button>
 </div>
 
-<!-- MAIN -->
 <div class="main">
-
-  <div class="topbar">
-    <h1>Willkommen im Dashboard</h1>
-    <button class="logout-btn">Abmelden</button>
-  </div>
-
-  <div class="cards">
-
-    <div class="card" onclick="window.location.href='/BrettWebsite/downloadcenter.html'">
-      <h3>📦 Downloads</h3>
-      <p>Verwalten Sie Ihre heruntergeladenen Produkte.</p>
-    </div>
-
-    <div class="card" onclick="window.location.href='/BrettWebsite/Online-tools.html'">
-      <h3>🛠 Tools</h3>
-      <p>Greifen Sie auf Ihre Online-Tools zu.</p>
-    </div>
-
-    <div class="card" onclick="window.location.href='/BrettWebsite/Lizenz.html'">
-      <h3>🔐 Lizenz</h3>
-      <p>Verwalten Sie Ihre Lizenzdaten.</p>
-    </div>
-
-  </div>
-
+  <h1>Willkommen im Dashboard</h1>
 </div>
 
-<!-- SCRIPT -->
-<script type="module">
-import { getSession, logout as authLogout } from "/BrettWebsite/auth.js";
-
-async function checkSession() {
-  try {
-    const session = await getSession();
-    if (!session) {
-      window.location.href = "/BrettWebsite/logonUI.html";
-    }
-  } catch (err) {
-    console.error("Fehler beim Laden der Session:", err);
-    window.location.href = "/BrettWebsite/logonUI.html";
-  }
+<script>
+function go(page) {
+  window.location.href = "/BrettWebsite/" + page;
 }
 
-// Logout Button Event Listener
-document.querySelector(".logout-btn").addEventListener("click", async () => {
-  try {
-    await authLogout();
-    window.location.href = "/BrettWebsite/logonUI.html";
-  } catch (err) {
-    console.error("Fehler beim Logout:", err);
-    alert("Logout fehlgeschlagen!");
-  }
-});
-
-checkSession();
+function logout() {
+  window.location.href = "/BrettWebsite/logonUI.html";
+}
 </script>
 
 </body>
