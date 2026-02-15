@@ -2,53 +2,142 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>BRETT Registrierung</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BRETT | Registrierung</title>
+
 <style>
 body {
-  font-family: Arial;
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg,#ff7043,#e64a19);
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background: #f5f5f5;
 }
-.box {
-  width: 350px;
-  padding: 30px;
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+
+.card {
+  width: 380px;
+  padding: 50px 40px;
+  border-radius: 25px;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(25px);
+  box-shadow: 0 25px 50px rgba(0,0,0,0.35);
+  color: white;
+  text-align: center;
 }
+
+.card h2 {
+  margin-bottom: 30px;
+}
+
+.input-group {
+  position: relative;
+  margin-bottom: 20px;
+}
+
 input {
   width: 100%;
-  padding: 10px;
-  margin-bottom: 15px;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  outline: none;
 }
+
 button {
   width: 100%;
-  padding: 10px;
-  background: #ff7043;
+  padding: 14px;
+  border-radius: 50px;
   border: none;
-  color: white;
+  background: white;
+  color: #e64a19;
+  font-weight: bold;
   cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  transform: scale(1.05);
+}
+
+.error {
+  color: #ffdede;
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+
+.success {
+  color: #d4ffcc;
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+
+a {
+  display: block;
+  margin-top: 15px;
+  color: white;
+  text-decoration: none;
 }
 </style>
 </head>
+
 <body>
 
-<div class="box">
-<h2>Registrieren</h2>
+<div class="card">
+  <h2>BRETT Registrierung</h2>
 
-<input type="text" placeholder="Name">
-<input type="email" placeholder="E-Mail">
-<input type="password" placeholder="Passwort">
+  <div class="error" id="error"></div>
+  <div class="success" id="success"></div>
 
-<button onclick="register()">Registrieren</button>
+  <div class="input-group">
+    <input type="text" id="name" placeholder="Name" required>
+  </div>
+
+  <div class="input-group">
+    <input type="email" id="email" placeholder="E-Mail" required>
+  </div>
+
+  <div class="input-group">
+    <input type="password" id="password" placeholder="Passwort" required>
+  </div>
+
+  <button onclick="register()">Konto erstellen</button>
+
+  <a href="logonUI.html">Bereits registriert? Anmelden</a>
 </div>
 
 <script>
 function register() {
-  window.location.href = "/BrettWebsite/logonUI.html";
+
+  const name = document.getElementById("name").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const error = document.getElementById("error");
+  const success = document.getElementById("success");
+
+  error.textContent = "";
+  success.textContent = "";
+
+  if (!name || !email || !password) {
+    error.textContent = "Bitte alle Felder ausfüllen.";
+    return;
+  }
+
+  let users = JSON.parse(localStorage.getItem("brettUsers")) || [];
+
+  if (users.find(u => u.email === email)) {
+    error.textContent = "Diese E-Mail ist bereits registriert.";
+    return;
+  }
+
+  users.push({ name, email, password });
+  localStorage.setItem("brettUsers", JSON.stringify(users));
+
+  success.textContent = "Registrierung erfolgreich! Weiterleitung...";
+
+  setTimeout(() => {
+    window.location.href = "logonUI.html";
+  }, 1500);
 }
 </script>
 
