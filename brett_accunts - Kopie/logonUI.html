@@ -6,19 +6,11 @@
 <title>BRETT Login</title>
 <style>
 /* Grundlayout */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
+* { box-sizing: border-box; margin: 0; padding: 0; }
 body {
-  font-family: "Arial", sans-serif;
+  font-family: Arial, sans-serif;
   background: linear-gradient(135deg, #00aaff, #0055aa);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+  display: flex; justify-content: center; align-items: center; height: 100vh;
   color: #333;
 }
 
@@ -26,100 +18,47 @@ body {
 .box {
   width: 400px;
   padding: 40px;
-  background-color: #ffffff;
+  background-color: #fff;
   border-radius: 12px;
   box-shadow: 0 8px 20px rgba(0,0,0,0.25);
   text-align: center;
-  position: relative;
 }
 
 /* Titel */
-.box p.gruen {
-  color: #00aa55;
-  font-weight: bold;
-  font-size: 18px;
-}
-
-.box p.blau {
-  color: #0077cc;
-  font-size: 16px;
-}
-
-.box h1 {
-  color: #0077cc;
-  margin: 20px 0;
-  font-size: 28px;
-}
+p.gruen { color: #00aa55; font-weight: bold; font-size: 18px; }
+p.blau { color: #0077cc; font-size: 16px; }
+h1 { color: #0077cc; margin: 20px 0; font-size: 28px; }
 
 /* Inputs */
 input[type="email"], input[type="password"] {
-  width: 100%;
-  padding: 12px;
-  margin: 10px 0 20px 0;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 16px;
+  width: 100%; padding: 12px; margin: 10px 0 20px 0;
+  border: 1px solid #ccc; border-radius: 6px; font-size: 16px;
   transition: border 0.3s ease;
 }
-
-input:focus {
-  border-color: #00aaff;
-  outline: none;
-}
+input:focus { border-color: #00aaff; outline: none; }
 
 /* Button */
 .btn {
-  width: 100%;
-  padding: 12px;
-  border: none;
-  border-radius: 6px;
-  background: #00aaff;
-  color: white;
-  font-size: 16px;
-  cursor: pointer;
+  width: 100%; padding: 12px; border: none; border-radius: 6px;
+  background: #00aaff; color: white; font-size: 16px; cursor: pointer;
   transition: background 0.3s ease;
 }
-
-.btn:hover {
-  background: #0088cc;
-}
+.btn:hover { background: #0088cc; }
 
 /* Loader */
 .loader {
-  border: 6px solid #f3f3f3;
-  border-top: 6px solid #3498db;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  margin: 20px auto;
-  display: none;
-  animation: spin 1s linear infinite;
+  border: 6px solid #f3f3f3; border-top: 6px solid #3498db;
+  border-radius: 50%; width: 40px; height: 40px;
+  margin: 20px auto; display: none; animation: spin 1s linear infinite;
 }
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
 /* Meldungen */
-#msg {
-  font-weight: bold;
-  margin-bottom: 15px;
-  min-height: 20px;
-}
+#msg { font-weight: bold; margin-bottom: 15px; min-height: 20px; }
 
 /* Link */
-a.orangefarbig {
-  color: #ff8800;
-  display: block;
-  margin-top: 20px;
-  text-decoration: none;
-  font-weight: bold;
-}
-
-a.orangefarbig:hover {
-  text-decoration: underline;
-}
+a.orangefarbig { color: #ff8800; display: block; margin-top: 20px; text-decoration: none; font-weight: bold; }
+a.orangefarbig:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -128,11 +67,10 @@ a.orangefarbig:hover {
   <p class="gruen">BRETT Login-System</p>
   <p class="blau">Willkommen zurück!</p>
   <hr>
-
   <h1>Anmelden</h1>
 
-  <input id="email" type="email" placeholder="E-Mail">
-  <input id="password" type="password" placeholder="Passwort">
+  <input id="emailField" type="email" placeholder="E-Mail">
+  <input id="passwordField" type="password" placeholder="Passwort">
 
   <p id="msg" class="rot"></p>
 
@@ -145,13 +83,13 @@ a.orangefarbig:hover {
 <script type="module">
 import { login, getSession } from "./auth.js";
 
-const emailField = document.getElementById("email");
-const passwordField = document.getElementById("password");
-const msg = document.getElementById("msg");
+const emailField = document.getElementById("emailField");
+const passwordField = document.getElementById("passwordField");
 const loginBtn = document.getElementById("loginBtn");
 const spinner = document.getElementById("spinner");
+const msg = document.getElementById("msg");
 
-async function loadLoginData() {
+async function handleLogin() {
   msg.textContent = "";
   emailField.style.display = "none";
   passwordField.style.display = "none";
@@ -171,7 +109,8 @@ async function loadLoginData() {
   }
 }
 
-loginBtn.addEventListener("click", loadLoginData);
+// Event Listener
+loginBtn.addEventListener("click", handleLogin);
 
 // Automatische Weiterleitung, falls Session existiert
 (async () => {
