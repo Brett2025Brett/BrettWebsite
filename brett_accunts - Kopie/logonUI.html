@@ -151,9 +151,8 @@ const msg = document.getElementById("msg");
 const loginBtn = document.getElementById("loginBtn");
 const spinner = document.getElementById("spinner");
 
-async function loadLoginRegisterData() {
+async function loadLoginData() {
   msg.textContent = "";
-
   emailField.style.display = "none";
   passwordField.style.display = "none";
   loginBtn.style.display = "none";
@@ -172,7 +171,7 @@ async function loadLoginRegisterData() {
   }
 }
 
-loginBtn.addEventListener("click", loadLoginRegisterData);
+loginBtn.addEventListener("click", loadLoginData);
 
 // Automatische Weiterleitung, falls Session existiert
 (async () => {
