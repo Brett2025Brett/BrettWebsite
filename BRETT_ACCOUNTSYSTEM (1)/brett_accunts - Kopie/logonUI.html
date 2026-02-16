@@ -1,0 +1,128 @@
+<html>
+<style>
+html, body {
+  height: 100%;
+  margin: 0;
+}
+body {
+  font-family: "Arial", sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.box {
+  width: 400px;
+  padding: 20px;
+  border: 1px solid #333;
+  background-color: #f5f5f5;
+}
+.rot { color: red; }
+.blau { color: blue; }
+.gruen { color: green; }
+.orangefarbig { color: orange; }
+
+.btn {
+  background: #00aaff;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+loader {
+  border: 6px solid #f3f3f3;
+  border-top: 6px solid #3498db;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  margin: 10px auto;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+
+</style>
+
+<body>
+
+<div class="box">
+  <p class="gruen">BRETT Login-System</p>
+  <p class="blau">Willkommen zurück!</p>
+  <hr>
+
+  <h1 class="blau">Anmelden</h1>
+
+  <label for="email">E-Mail:</label>
+  <input id="email" type="email"><br>
+
+  <label for="password">Passwort:</label>
+  <input id="password" type="password"><br><br>
+
+  <p id="msg" class="rot"></p>
+
+  <button id="loginBtn" class="btn">Anmelden</button>
+  <div id="spinner" class="loader" style="display:none;"></div>
+
+
+  <br>
+  <a href="signup.html" class="orangefarbig">Noch kein Konto? Ein neues erstellen!</a>
+</div>
+
+<script type="module">
+  import { login, getSession } from "./auth.js";
+
+  const email = document.getElementById("email");
+  const password = document.getElementById("password");
+  const msg = document.getElementById("msg");
+  const loginBtn = document.getElementById("loginBtn");
+const emailField = document.getElementById("email");
+const passwordField = document.getElementById("password");
+const spinner = document.getElementById("spinner");
+
+
+  async function loadLoginRegisterData() {
+  msg.textContent = "";
+
+  // Eingabefelder + Button ausblenden
+  emailField.style.display = "none";
+  passwordField.style.display = "none";
+  loginBtn.style.display = "none";
+
+  // Spinner anzeigen
+  spinner.style.display = "block";
+
+  try {
+    await login(emailField.value, passwordField.value);
+    msg.textContent = "Login erfolgreich. Weiterleitung...";
+    setTimeout(() => window.location.href = "dashboard.html", 1000);
+  } catch (err) {
+    msg.textContent = err.message;
+
+    // Bei Fehler wieder anzeigen
+    emailField.style.display = "block";
+    passwordField.style.display = "block";
+    loginBtn.style.display = "block";
+    spinner.style.display = "none";
+  }
+}
+
+
+  // Event Listener statt onclick
+  loginBtn.addEventListener("click", loadLoginRegisterData);
+
+  // Automatische Weiterleitung, falls Session existiert
+  (async () => {
+    const session = await getSession();
+    if (session) window.location.href = "dashboard.html";
+  })();
+</script>
+
+</body>
+</html>
+
