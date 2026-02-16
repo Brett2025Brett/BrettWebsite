@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Login / Signup</title>
+</head>
+<body>
+  <h1>Willkommen</h1>
+
+  <input id="email" type="email" placeholder="Email"><br>
+  <input id="password" type="password" placeholder="Passwort"><br><br>
+
+  <button id="signupBtn">Sign Up</button>
+  <button id="loginBtn">Login</button>
+
+  <p id="msg"></p>
+
+  <script type="module">
+    import { signUp, login, getSession } from "./auth.js";
+
+    const email = document.getElementById("email");
+    const password = document.getElementById("password");
+    const msg = document.getElementById("msg");
+
+    document.getElementById("signupBtn").onclick = async () => {
+      try {
+        await signUp(email.value, password.value);
+        msg.textContent = "Registrierung erfolgreich. Bitte E-Mail bestätigen.";
+      } catch (err) {
+        msg.textContent = err.message;
+      }
+    };
+
+    document.getElementById("loginBtn").onclick = async () => {
+      try {
+        await login(email.value, password.value);
+        msg.textContent = "Login erfolgreich. Weiterleitung...";
+        setTimeout(() => window.location.href = "dashboard.html", 1000);
+      } catch (err) {
+        msg.textContent = err.message;
+      }
+    };
+
+    // Wenn schon eingeloggt → direkt weiterleiten
+    (async () => {
+      const session = await getSession();
+      if (session) window.location.href = "dashboard.html";
+    })();
+  </script>
+</body>
+</html>
+
