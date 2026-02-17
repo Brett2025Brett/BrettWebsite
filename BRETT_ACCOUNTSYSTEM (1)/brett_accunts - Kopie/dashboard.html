@@ -3,167 +3,114 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BRETT | Dashboard</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<title>BRETT Dashboard</title>
 
 <style>
 * {
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
 }
-html, body {
-  margin: 0;
-  height: 100%;
-  font-family: 'Inter', sans-serif;
-  background: #0f1117;
+
+body {
+  font-family: Arial, sans-serif;
+  background: #0f0f14;
   color: white;
-  overflow: hidden;
-}
-
-/* Layout */
-.app {
   display: flex;
-  height: 100%;
+  height: 100vh;
 }
 
-/* Sidebar */
+/* ===== SIDEBAR ===== */
 .sidebar {
-  width: 260px;
-  background: #0b0d12;
-  padding: 25px 20px;
+  width: 240px;
+  background: #18181f;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid rgba(255,255,255,0.05);
-  transition: transform 0.3s ease;
+  justify-content: space-between;
 }
 
 .logo {
-  font-size: 22px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: bold;
   color: #00c6ff;
-  margin-bottom: 40px;
+  margin-bottom: 30px;
 }
 
-.nav-item {
-  padding: 12px 15px;
-  border-radius: 10px;
-  margin-bottom: 8px;
-  cursor: pointer;
-  transition: 0.2s;
-  opacity: 0.85;
+.nav a {
+  display: block;
+  padding: 12px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: #ccc;
+  transition: 0.3s;
 }
 
-.nav-item:hover {
-  background: rgba(0,198,255,0.1);
-  opacity: 1;
+.nav a:hover {
+  background: #00c6ff;
+  color: black;
 }
 
 .logout {
-  margin-top: auto;
-  padding: 12px;
-  border-radius: 10px;
-  background: rgba(255,75,43,0.1);
-  color: #ff4b2b;
+  margin-top: 20px;
+}
+
+.logout button {
+  width: 100%;
+  padding: 10px;
   border: none;
+  background: #ff3b3b;
+  color: white;
+  border-radius: 6px;
   cursor: pointer;
-  transition: 0.2s;
+  transition: 0.3s;
 }
 
-.logout:hover {
-  background: rgba(255,75,43,0.25);
+.logout button:hover {
+  background: #ff0000;
 }
 
-/* Main Content */
+/* ===== CONTENT ===== */
 .main {
   flex: 1;
   padding: 40px;
   overflow-y: auto;
 }
 
-.header {
-  font-size: 28px;
-  font-weight: 700;
-}
-
-.sub {
-  margin-bottom: 40px;
-  opacity: 0.7;
-}
-
-/* Cards */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 25px;
-}
-
 .card {
-  background: #151922;
-  padding: 25px;
-  border-radius: 16px;
+  background: #1f1f27;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
   transition: 0.3s;
-  border: 1px solid rgba(255,255,255,0.05);
 }
 
 .card:hover {
-  transform: translateY(-5px);
-  border: 1px solid #00c6ff;
-  box-shadow: 0 10px 30px rgba(0,198,255,0.15);
+  transform: translateY(-3px);
+  box-shadow: 0 0 15px rgba(0,198,255,0.4);
 }
 
-.card h3 {
-  margin-top: 0;
+.card h2 {
+  margin-bottom: 10px;
   color: #00c6ff;
 }
 
-.card p {
-  opacity: 0.8;
-  font-size: 14px;
-}
-
-/* Hamburger */
-.hamburger {
-  display: none;
-  position: fixed;
-  top: 20px;
-  left: 20px;
-  font-size: 26px;
-  cursor: pointer;
-  z-index: 1000;
-}
-
-/* Overlay */
-.overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.6);
-  z-index: 900;
-}
-
-/* Mobile */
-@media (max-width: 900px) {
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+  body {
+    flex-direction: column;
+  }
   .sidebar {
-    position: fixed;
-    height: 100%;
-    transform: translateX(-100%);
-    z-index: 1001;
+    width: 100%;
+    flex-direction: row;
+    overflow-x: auto;
   }
-
-  .sidebar.active {
-    transform: translateX(0);
+  .nav {
+    display: flex;
   }
-
-  .hamburger {
-    display: block;
-  }
-
-  .overlay.active {
-    display: block;
-  }
-
-  .main {
-    padding: 80px 25px 25px 25px;
+  .nav a {
+    margin-right: 10px;
   }
 }
 </style>
@@ -171,86 +118,58 @@ html, body {
 
 <body>
 
-<div class="hamburger" id="hamburger">☰</div>
-<div class="overlay" id="overlay"></div>
-
-<div class="app">
-
-  <div class="sidebar" id="sidebar">
+<div class="sidebar">
+  <div>
     <div class="logo">BRETT</div>
-
-    <div class="nav-item">🏠 Dashboard</div>
-    <div class="nav-item">⬇ Downloads</div>
-    <div class="nav-item">⚙ Einstellungen</div>
-    <div class="nav-item">📊 Aktivitäten</div>
-
-    <button id="logoutBtn" class="logout">Logout</button>
-  </div>
-
-  <div class="main">
-    <div class="header">Willkommen zurück 👋</div>
-    <div class="sub" id="user"></div>
-
-    <div class="grid">
-
-      <div class="card">
-        <h3>👤 Profil</h3>
-        <p id="cardEmail"></p>
-      </div>
-
-      <div class="card">
-        <h3>🟢 Status</h3>
-        <p>System aktiv & verbunden</p>
-      </div>
-
-      <div class="card">
-        <h3>⬇ Downloads</h3>
-        <p>3 Produkte verfügbar</p>
-      </div>
-
-      <div class="card">
-        <h3>🚀 Version</h3>
-        <p>BRETT Dashboard v2.0</p>
-      </div>
-
+    <div class="nav">
+      <a href="#">Dashboard</a>
+      <a href="downloadcenter.html">Download Center</a>
+      <a href="#">Projekte</a>
+      <a href="#">Einstellungen</a>
     </div>
   </div>
 
+  <div class="logout">
+    <button id="logoutBtn">Logout</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="card">
+    <h2>Willkommen</h2>
+    <p id="user"></p>
+  </div>
+
+  <div class="card">
+    <h2>System Status</h2>
+    <p>BRETT System läuft stabil 🚀</p>
+  </div>
+
+  <div class="card">
+    <h2>Neuigkeiten</h2>
+    <p>Neue Updates und Downloads sind verfügbar.</p>
+  </div>
 </div>
 
 <script type="module">
-  import { getSession, logout } from "./auth.js";
+import { getSession, logout } from "./auth.js";
 
-  const sidebar = document.getElementById("sidebar");
-  const hamburger = document.getElementById("hamburger");
-  const overlay = document.getElementById("overlay");
-  const userEl = document.getElementById("user");
-  const emailCard = document.getElementById("cardEmail");
+const userEl = document.getElementById("user");
 
-  hamburger.onclick = () => {
-    sidebar.classList.toggle("active");
-    overlay.classList.toggle("active");
-  };
+// Session prüfen
+(async () => {
+  const session = await getSession();
+  if (!session) {
+    window.location.href = "loginUI.html";
+    return;
+  }
+  userEl.textContent = "Eingeloggt als: " + session.user.email;
+})();
 
-  overlay.onclick = () => {
-    sidebar.classList.remove("active");
-    overlay.classList.remove("active");
-  };
-
-  (async () => {
-    const session = await getSession();
-    if (!session) {
-      window.location.href = "logonUI.html";
-      return;
-    }
-    userEl.textContent = "Eingeloggt als: " + session.user.email;
-    emailCard.textContent = session.user.email;
-  })();
-
-  document.getElementById("logoutBtn").onclick = async () => {
-    await logout();
-    window.location.href = "logonUI.html";
-  };
+document.getElementById("logoutBtn").onclick = async () => {
+  await logout();
+  window.location.href = "loginUI.html";
+};
 </script>
 
 </body>
