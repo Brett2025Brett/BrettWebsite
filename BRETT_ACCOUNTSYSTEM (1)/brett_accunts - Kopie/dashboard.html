@@ -3,9 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BRETT Premium Dashboard</title>
+<title>BRETT Ultra Dashboard</title>
 
-<!-- Icons -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
 <style>
@@ -13,67 +12,79 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: Arial, sans-serif;
+  font-family: "Segoe UI", Arial, sans-serif;
 }
 
 body {
-  background: #0c0f17;
-  color: white;
-  display: flex;
   height: 100vh;
+  display: flex;
+  background: linear-gradient(135deg, #0f172a, #0c0f17, #111827);
+  background-size: 400% 400%;
+  animation: gradientMove 15s ease infinite;
+  color: white;
   overflow: hidden;
+}
+
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 /* ===== SIDEBAR ===== */
 .sidebar {
-  width: 250px;
-  background: #121826;
-  padding: 25px;
+  width: 260px;
+  backdrop-filter: blur(20px);
+  background: rgba(20, 25, 40, 0.7);
+  border-right: 1px solid rgba(255,255,255,0.05);
+  padding: 30px 20px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   transition: 0.3s;
+  z-index: 1001;
 }
 
 .logo {
   font-size: 22px;
   font-weight: bold;
-  color: #00f2ff;
-  margin-bottom: 30px;
-  text-shadow: 0 0 10px #00f2ff;
+  margin-bottom: 40px;
+  background: linear-gradient(90deg,#00f2ff,#4f46e5);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .nav a {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px;
-  margin-bottom: 12px;
-  border-radius: 8px;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 10px;
   text-decoration: none;
-  color: #aaa;
+  color: #cbd5e1;
+  margin-bottom: 12px;
   transition: 0.3s;
 }
 
 .nav a:hover {
-  background: #00f2ff;
-  color: black;
-  box-shadow: 0 0 15px #00f2ff;
+  background: rgba(0,242,255,0.1);
+  color: #00f2ff;
+  transform: translateX(5px);
 }
 
 .logout button {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   border: none;
-  background: #ff3b3b;
+  border-radius: 8px;
+  background: linear-gradient(90deg,#ff3b3b,#ff0000);
   color: white;
-  border-radius: 6px;
   cursor: pointer;
   transition: 0.3s;
 }
 
 .logout button:hover {
-  box-shadow: 0 0 15px red;
+  transform: scale(1.05);
 }
 
 /* ===== MAIN ===== */
@@ -86,23 +97,23 @@ body {
 /* ===== CARDS ===== */
 .cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit,minmax(240px,1fr));
+  gap: 25px;
   margin-bottom: 30px;
 }
 
 .card {
-  background: #151c2c;
-  padding: 20px;
-  border-radius: 12px;
+  backdrop-filter: blur(15px);
+  background: rgba(255,255,255,0.05);
+  border-radius: 16px;
+  padding: 25px;
+  border: 1px solid rgba(255,255,255,0.05);
   transition: 0.3s;
-  position: relative;
-  overflow: hidden;
 }
 
 .card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 0 25px #00f2ff44;
+  transform: translateY(-6px);
+  box-shadow: 0 10px 40px rgba(0,242,255,0.2);
 }
 
 .card h3 {
@@ -111,28 +122,34 @@ body {
 }
 
 .stat {
-  font-size: 28px;
+  font-size: 30px;
   font-weight: bold;
 }
 
-/* Glow Animation */
-.card::before {
-  content: "";
-  position: absolute;
-  width: 150%;
-  height: 150%;
-  background: radial-gradient(circle, #00f2ff33 0%, transparent 70%);
-  top: -50%;
-  left: -50%;
-  animation: rotateGlow 6s linear infinite;
+/* Chart Placeholder */
+.chart {
+  height: 250px;
+  margin-top: 15px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(0,242,255,0.2), transparent);
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  padding: 15px;
 }
 
-@keyframes rotateGlow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+.bar {
+  flex: 1;
+  background: linear-gradient(180deg,#00f2ff,#4f46e5);
+  border-radius: 6px 6px 0 0;
+  transition: 0.3s;
 }
 
-/* ===== HAMBURGER ===== */
+.bar:hover {
+  opacity: 0.8;
+}
+
+/* ===== MOBILE ===== */
 .hamburger {
   display: none;
   position: absolute;
@@ -140,16 +157,27 @@ body {
   left: 20px;
   font-size: 22px;
   cursor: pointer;
+  z-index: 1002;
 }
 
-/* ===== MOBILE ===== */
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 1000;
+}
+
+.overlay.active {
+  display: block;
+}
+
 @media (max-width: 768px) {
   .sidebar {
     position: fixed;
-    left: -260px;
+    left: -270px;
     top: 0;
     height: 100%;
-    z-index: 1000;
   }
 
   .sidebar.active {
@@ -158,10 +186,6 @@ body {
 
   .hamburger {
     display: block;
-  }
-
-  body {
-    flex-direction: column;
   }
 
   .main {
@@ -177,6 +201,8 @@ body {
   <i class="fas fa-bars"></i>
 </div>
 
+<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
 <div class="sidebar" id="sidebar">
   <div>
     <div class="logo">BRETT</div>
@@ -185,8 +211,12 @@ body {
       <a href="https://brett2025brett.github.io/BrettWebsite/downloadcenter.html">
         <i class="fas fa-download"></i> Downloads
       </a>
-      <a href="#"><i class="fas fa-folder"></i> Projekte</a>
-      <a href="#"><i class="fas fa-user"></i> Account</a>
+      <a href="https://brett2025brett.github.io/BrettWebsite/projects.html">
+        <i class="fas fa-folder"></i> Projekte
+      </a>
+      <a href="https://brett2025brett.github.io/BrettWebsite/account.html">
+        <i class="fas fa-user"></i> Account
+      </a>
     </div>
   </div>
 
@@ -196,7 +226,7 @@ body {
 </div>
 
 <div class="main">
-  <h1 style="margin-bottom:30px;">Premium Dashboard</h1>
+  <h1 style="margin-bottom:30px;">Ultra Premium Dashboard</h1>
 
   <div class="cards">
     <div class="card">
@@ -210,13 +240,24 @@ body {
     </div>
 
     <div class="card">
-      <h3>Account Status</h3>
-      <div class="stat">Aktiv</div>
+      <h3>System Status</h3>
+      <div class="stat">Online</div>
     </div>
   </div>
 
   <div class="card">
-    <h3>Willkommen</h3>
+    <h3>Analytics</h3>
+    <div class="chart">
+      <div class="bar" style="height:40%"></div>
+      <div class="bar" style="height:70%"></div>
+      <div class="bar" style="height:55%"></div>
+      <div class="bar" style="height:90%"></div>
+      <div class="bar" style="height:60%"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Account</h3>
     <p id="user"></p>
   </div>
 </div>
@@ -224,16 +265,14 @@ body {
 <script type="module">
 import { getSession, logout } from "./auth.js";
 
-const userEl = document.getElementById("user");
-
-// Session prüfen
 (async () => {
   const session = await getSession();
   if (!session) {
     window.location.href = "loginUI.html";
     return;
   }
-  userEl.textContent = "Eingeloggt als: " + session.user.email;
+  document.getElementById("user").textContent =
+    "Eingeloggt als: " + session.user.email;
 })();
 
 document.getElementById("logoutBtn").onclick = async () => {
@@ -241,29 +280,24 @@ document.getElementById("logoutBtn").onclick = async () => {
   window.location.href = "loginUI.html";
 };
 
-// Fake Live Stats Animation
 function animateValue(id, end, duration) {
   let start = 0;
-  let range = end - start;
   let current = start;
-  let increment = end > start ? 1 : -1;
-  let stepTime = Math.abs(Math.floor(duration / range));
+  let stepTime = Math.abs(Math.floor(duration / end));
   let obj = document.getElementById(id);
   let timer = setInterval(function() {
-    current += increment;
+    current++;
     obj.textContent = current;
-    if (current == end) {
-      clearInterval(timer);
-    }
+    if (current == end) clearInterval(timer);
   }, stepTime);
 }
 
-animateValue("projects", 12, 1000);
-animateValue("downloads", 348, 1500);
+animateValue("projects", 18, 1200);
+animateValue("downloads", 512, 1800);
 
-// Mobile Toggle
 window.toggleMenu = function() {
   document.getElementById("sidebar").classList.toggle("active");
+  document.getElementById("overlay").classList.toggle("active");
 };
 </script>
 
