@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BRETT Enterprise SaaS - LEVEL 6</title>
+<title>BRETT SaaS Dashboard - LEVEL 9</title>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -12,32 +12,24 @@
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;}
 body{height:100vh;display:flex;background:#0b1220;color:white;overflow:hidden;}
 canvas#particles{position:fixed;top:0;left:0;z-index:0;}
-
-/* SIDEBAR */
-.sidebar{
-  width:260px;background:rgba(20,30,60,0.7);backdrop-filter:blur(25px);
-  padding:25px;display:flex;flex-direction:column;justify-content:space-between;z-index:2;transition:.3s;
-}
+.sidebar{width:260px;background:rgba(20,30,60,0.8);backdrop-filter:blur(25px);padding:25px;display:flex;flex-direction:column;justify-content:space-between;z-index:2;transition:.3s;}
 .logo{font-size:22px;font-weight:bold;color:#00f2ff;margin-bottom:30px;text-shadow:0 0 15px #00f2ff;}
 .nav a{display:flex;align-items:center;gap:12px;padding:12px;margin-bottom:10px;border-radius:10px;text-decoration:none;color:#ccc;transition:.3s;}
 .nav a:hover{background:#00f2ff;color:black;box-shadow:0 0 20px #00f2ff;}
 .logout button{width:100%;padding:10px;border:none;border-radius:8px;background:#ff3b3b;color:white;cursor:pointer;}
-
-/* MAIN */
 .main{flex:1;padding:40px;overflow-y:auto;position:relative;z-index:1;}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;}
 .card{background:rgba(255,255,255,0.05);backdrop-filter:blur(20px);padding:20px;border-radius:15px;cursor:grab;transition:.3s;}
 .card:hover{transform:translateY(-5px);box-shadow:0 0 30px #00f2ff55;}
 .stat{font-size:28px;font-weight:bold;}
-.xp-bar{width:100%;height:12px;background:#1e293b;border-radius:10px;overflow:hidden;margin-top:10px;}
-.xp-fill{height:100%;width:65%;background:linear-gradient(90deg,#00f2ff,#0077ff);}
-.badges span{display:inline-block;background:#00f2ff22;padding:6px 10px;border-radius:20px;margin:5px;font-size:12px;}
-.notifications{position:absolute;top:20px;right:20px;background:#00f2ff;color:black;padding:8px 12px;border-radius:20px;font-size:12px;}
+.notifications{position:absolute;top:20px;right:20px;background:#00f2ff;color:black;padding:8px 12px;border-radius:20px;font-size:12px;cursor:pointer;}
 .hamburger{display:none;position:absolute;top:20px;left:20px;font-size:22px;cursor:pointer;z-index:5;}
 @media(max-width:768px){.sidebar{position:fixed;left:-280px;height:100%;}.sidebar.active{left:0;}.hamburger{display:block;}}
+.modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#1e293b;padding:20px;border-radius:15px;display:none;z-index:10;width:300px;}
+.modal.active{display:block;}
+.modal input, .modal button{width:100%;margin-top:10px;padding:8px;border-radius:6px;border:none;}
 </style>
 </head>
-
 <body>
 <canvas id="particles"></canvas>
 
@@ -53,6 +45,7 @@ canvas#particles{position:fixed;top:0;left:0;z-index:0;}
       <a href="https://brett2025brett.github.io/BrettWebsite/downloadcenter.html"><i class="fas fa-download"></i> Downloads</a>
       <a href="https://brett2025brett.github.io/BrettWebsite/projekte.html"><i class="fas fa-folder"></i> Projekte</a>
       <a href="https://brett2025brett.github.io/BrettWebsite/account.html"><i class="fas fa-user"></i> Account</a>
+      <a href="#" id="settingsBtn"><i class="fas fa-cog"></i> Settings</a>
     </div>
   </div>
   <div class="logout">
@@ -61,122 +54,110 @@ canvas#particles{position:fixed;top:0;left:0;z-index:0;}
 </div>
 
 <div class="main">
-<div class="notifications" id="notification">🔔 3 Neue Aktivitäten</div>
-<h1 style="margin-bottom:30px;">BRETT Enterprise</h1>
+<div class="notifications" id="notification">🔔 0 Neue Aktivitäten</div>
+<h1 style="margin-bottom:30px;">BRETT SaaS Dashboard - LEVEL 9</h1>
 
-<div class="grid">
-
-<div class="card" draggable="true">
-<h3>Live Downloads</h3>
-<canvas id="chartDownloads"></canvas>
-</div>
-
-<div class="card" draggable="true">
-<h3>System Status</h3>
-<p id="serverStatus">Server: Online</p>
-<p>API: Stabil</p>
-<p>Security: Aktiv</p>
-</div>
-
-<div class="card" draggable="true">
-<h3>User Übersicht</h3>
-<p id="user"></p>
-<div class="xp-bar"><div class="xp-fill"></div></div>
-<div class="badges">
-  <span>🚀 Early User</span>
-  <span>💎 Premium</span>
-  <span>🔥 Active</span>
+<div class="grid" id="grid">
+  <div class="card" draggable="true" data-id="1">
+    <h3>Live Downloads</h3>
+    <canvas id="chartDownloads"></canvas>
+  </div>
+  <div class="card" draggable="true" data-id="2">
+    <h3>System Status</h3>
+    <p id="serverStatus">Server: Online</p>
+    <p>API: Stabil</p>
+    <p>Memory Usage: 45%</p>
+  </div>
+  <div class="card" draggable="true" data-id="3">
+    <h3>User Übersicht</h3>
+    <ul id="userList"></ul>
+    <button id="addUserBtn">Add User</button>
+  </div>
+  <div class="card" draggable="true" data-id="4">
+    <h3>Analytics</h3>
+    <canvas id="chartAnalytics"></canvas>
+  </div>
 </div>
 </div>
 
-<div class="card" draggable="true">
-<h3>Analytics</h3>
-<canvas id="chartAnalytics"></canvas>
-</div>
-
-</div>
+<!-- Settings Modal -->
+<div class="modal" id="settingsModal">
+  <h3>Settings Panel</h3>
+  <label>Theme:</label>
+  <select id="themeSelect">
+    <option value="dark">Dark</option>
+    <option value="light">Light</option>
+  </select>
+  <button id="closeSettings">Close</button>
 </div>
 
 <script type="module">
 import { getSession, logout } from "./auth.js";
 const LOGIN_URL="https://brett2025brett.github.io/BrettWebsite/BRETT_ACCOUNTSYSTEM%20(1)/brett_accunts%20-%20Kopie/logonUI.html";
-const userEl=document.getElementById("user");
+const userListEl=document.getElementById("userList");
 
-/* Session + User */
+/* Session */
 (async()=>{
   const session=await getSession();
   if(!session){ window.location.href=LOGIN_URL; return;}
-  userEl.textContent="Eingeloggt als: "+session.user.email+" (Admin)";
 })();
 
 /* Logout */
 document.getElementById("logoutBtn").onclick=async()=>{await logout();window.location.href=LOGIN_URL;};
 
-/* Chart Downloads (Live Simulation) */
-const ctxD=document.getElementById("chartDownloads").getContext("2d");
-const chartDownloads=new Chart(ctxD,{
-  type:"bar",
-  data:{labels:["Jan","Feb","Mär","Apr","Mai","Jun"],datasets:[{label:"Downloads",data:[12,25,18,30,22,40],backgroundColor:"#00f2ff"}]},
-  options:{plugins:{legend:{labels:{color:"white"}}},scales:{x:{ticks:{color:"white"}},y:{ticks:{color:"white"}}}}
-});
-setInterval(()=>{
-  chartDownloads.data.datasets[0].data=chartDownloads.data.datasets[0].data.map(d=>d+Math.floor(Math.random()*5));
-  chartDownloads.update();
-},3000);
+/* Fake REST API Simulation */
+let users=[{name:"Max",role:"User",online:true},{name:"Anna",role:"User",online:false},{name:"Laura",role:"Admin",online:true}];
+function renderUsers(){
+  userListEl.innerHTML="";
+  users.forEach((u,i)=>{
+    const li=document.createElement("li");
+    li.textContent=`${u.name} (${u.role}) ${u.online?'🟢 Online':'🔴 Offline'}`;
+    const editBtn=document.createElement("button");
+    editBtn.textContent="Edit";
+    editBtn.onclick=()=>{const newName=prompt("Neuer Name:",u.name); if(newName){u.name=newName; renderUsers();}}
+    const removeBtn=document.createElement("button");
+    removeBtn.textContent="Remove";
+    removeBtn.onclick=()=>{users.splice(i,1); renderUsers();}
+    li.appendChild(editBtn); li.appendChild(removeBtn);
+    userListEl.appendChild(li);
+  });
+}
+renderUsers();
 
-/* Chart Analytics */
+/* Add User */
+document.getElementById("addUserBtn").onclick=()=>{
+  const name=prompt("Name des Users:"); 
+  if(name) {users.push({name:name,role:"User",online:true}); renderUsers();}
+}
+
+/* Charts */
+const ctxD=document.getElementById("chartDownloads").getContext("2d");
+const chartDownloads=new Chart(ctxD,{type:"bar",data:{labels:["Jan","Feb","Mär","Apr","Mai","Jun"],datasets:[{label:"Downloads",data:[12,25,18,30,22,40],backgroundColor:"#00f2ff"}]},options:{plugins:{legend:{labels:{color:"white"}}},scales:{x:{ticks:{color:"white"}},y:{ticks:{color:"white"}}}});
 const ctxA=document.getElementById("chartAnalytics").getContext("2d");
-const chartAnalytics=new Chart(ctxA,{
-  type:"line",
-  data:{labels:["Mo","Di","Mi","Do","Fr","Sa"],datasets:[{label:"Aktive Nutzer",data:[30,45,50,40,60,55],borderColor:"#00f2ff",backgroundColor:"rgba(0,242,255,0.2)",fill:true,tension:0.4}]},
-  options:{plugins:{legend:{labels:{color:"white"}}},scales:{x:{ticks:{color:"white"}},y:{ticks:{color:"white"}}}}
-});
-setInterval(()=>{
-  chartAnalytics.data.datasets[0].data=chartAnalytics.data.datasets[0].data.map(d=>d+Math.floor(Math.random()*3)-1);
-  chartAnalytics.update();
-},3000);
+const chartAnalytics=new Chart(ctxA,{type:"line",data:{labels:["Mo","Di","Mi","Do","Fr","Sa"],datasets:[{label:"Aktive Nutzer",data:[30,45,50,40,60,55],borderColor:"#00f2ff",backgroundColor:"rgba(0,242,255,0.2)",fill:true,tension:0.4}]} ,options:{plugins:{legend:{labels:{color:"white"}}},scales:{x:{ticks:{color:"white"}},y:{ticks:{color:"white"}}}});
+setInterval(()=>{chartDownloads.data.datasets[0].data=chartDownloads.data.datasets[0].data.map(d=>d+Math.floor(Math.random()*5)); chartDownloads.update(); chartAnalytics.data.datasets[0].data=chartAnalytics.data.datasets[0].data.map(d=>d+Math.floor(Math.random()*3)-1); chartAnalytics.update();},3000);
 
 /* Particles */
-const canvas=document.getElementById("particles");
-const ctx=canvas.getContext("2d");
-canvas.width=window.innerWidth; canvas.height=window.innerHeight;
-let particles=[];
-for(let i=0;i<150;i++){particles.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*2+1,dx:(Math.random()-0.5),dy:(Math.random()-0.5)});}
-function animateParticles(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  ctx.fillStyle="#00f2ff";
-  particles.forEach(p=>{
-    ctx.beginPath();
-    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-    ctx.fill();
-    p.x+=p.dx; p.y+=p.dy;
-    if(p.x>canvas.width)p.x=0;if(p.x<0)p.x=canvas.width;
-    if(p.y>canvas.height)p.y=0;if(p.y<0)p.y=canvas.height;
-  });
-  requestAnimationFrame(animateParticles);
-}
-animateParticles();
+const canvas=document.getElementById("particles"); const ctx=canvas.getContext("2d"); canvas.width=window.innerWidth; canvas.height=window.innerHeight; let particles=[]; for(let i=0;i<150;i++){particles.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*2+1,dx:(Math.random()-0.5),dy:(Math.random()-0.5)});} function animateParticles(){ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle="#00f2ff";particles.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();p.x+=p.dx;p.y+=p.dy;if(p.x>canvas.width)p.x=0;if(p.x<0)p.x=canvas.width;if(p.y>canvas.height)p.y=0;if(p.y<0)p.y=canvas.height;});requestAnimationFrame(animateParticles);} animateParticles();
 
-/* Drag & Drop */
-const cards=document.querySelectorAll(".card");
-let dragged=null;
-cards.forEach(card=>{
-  card.addEventListener("dragstart",()=>{dragged=card;});
-  card.addEventListener("dragover",(e)=>{e.preventDefault();});
-  card.addEventListener("drop",(e)=>{
-    if(dragged!=card){card.parentNode.insertBefore(dragged,card);}
-  });
-});
+/* Drag & Drop Widgets */
+const grid=document.getElementById("grid"); let dragged=null; const savedOrder=JSON.parse(localStorage.getItem("widgetOrder")||"[]");
+if(savedOrder.length){ savedOrder.forEach(id=>{const card=document.querySelector(`.card[data-id="${id}"]`); if(card)grid.appendChild(card);}); }
+const cards=document.querySelectorAll(".card"); cards.forEach(card=>{ card.addEventListener("dragstart",()=>{dragged=card;}); card.addEventListener("dragover",(e)=>{e.preventDefault();}); card.addEventListener("drop",()=>{if(dragged!=card){grid.insertBefore(dragged,card); saveOrder();}}); });
+function saveOrder(){const order=[...grid.children].map(c=>c.dataset.id);localStorage.setItem("widgetOrder",JSON.stringify(order));}
 
 /* Notifications Simulation */
-setInterval(()=>{
-  const notif=document.getElementById("notification");
-  let num=Math.floor(Math.random()*5)+1;
-  notif.textContent=`🔔 ${num} Neue Aktivitäten`;
-},5000);
+const notifEl=document.getElementById("notification");
+setInterval(()=>{ let num=Math.floor(Math.random()*5)+1; notifEl.textContent=`🔔 ${num} Neue Aktivitäten`; },5000);
 
 /* Hamburger */
 window.toggleMenu=function(){document.getElementById("sidebar").classList.toggle("active");};
+
+/* Settings Modal */
+const settingsModal=document.getElementById("settingsModal");
+document.getElementById("settingsBtn").onclick=()=>settingsModal.classList.add("active");
+document.getElementById("closeSettings").onclick=()=>settingsModal.classList.remove("active");
+document.getElementById("themeSelect").onchange=(e)=>{document.body.style.background=e.target.value==="dark"?"#0b1220":"#f5f5f5";};
 </script>
 </body>
 </html>
