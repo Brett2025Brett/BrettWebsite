@@ -3,57 +3,62 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BRETT Dashboard</title>
+<title>BRETT Premium Dashboard</title>
+
+<!-- Icons -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
 <style>
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: Arial, sans-serif;
 }
 
 body {
-  font-family: Arial, sans-serif;
-  background: #0f0f14;
+  background: #0c0f17;
   color: white;
   display: flex;
   height: 100vh;
+  overflow: hidden;
 }
 
 /* ===== SIDEBAR ===== */
 .sidebar {
-  width: 240px;
-  background: #18181f;
-  padding: 20px;
+  width: 250px;
+  background: #121826;
+  padding: 25px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  transition: 0.3s;
 }
 
 .logo {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: bold;
-  color: #00c6ff;
+  color: #00f2ff;
   margin-bottom: 30px;
+  text-shadow: 0 0 10px #00f2ff;
 }
 
 .nav a {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   padding: 12px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   border-radius: 8px;
   text-decoration: none;
-  color: #ccc;
+  color: #aaa;
   transition: 0.3s;
 }
 
 .nav a:hover {
-  background: #00c6ff;
+  background: #00f2ff;
   color: black;
-}
-
-.logout {
-  margin-top: 20px;
+  box-shadow: 0 0 15px #00f2ff;
 }
 
 .logout button {
@@ -68,49 +73,99 @@ body {
 }
 
 .logout button:hover {
-  background: #ff0000;
+  box-shadow: 0 0 15px red;
 }
 
-/* ===== CONTENT ===== */
+/* ===== MAIN ===== */
 .main {
   flex: 1;
   padding: 40px;
   overflow-y: auto;
 }
 
+/* ===== CARDS ===== */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
 .card {
-  background: #1f1f27;
+  background: #151c2c;
   padding: 20px;
   border-radius: 12px;
-  margin-bottom: 20px;
   transition: 0.3s;
+  position: relative;
+  overflow: hidden;
 }
 
 .card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 0 15px rgba(0,198,255,0.4);
+  transform: translateY(-5px);
+  box-shadow: 0 0 25px #00f2ff44;
 }
 
-.card h2 {
+.card h3 {
   margin-bottom: 10px;
-  color: #00c6ff;
+  color: #00f2ff;
+}
+
+.stat {
+  font-size: 28px;
+  font-weight: bold;
+}
+
+/* Glow Animation */
+.card::before {
+  content: "";
+  position: absolute;
+  width: 150%;
+  height: 150%;
+  background: radial-gradient(circle, #00f2ff33 0%, transparent 70%);
+  top: -50%;
+  left: -50%;
+  animation: rotateGlow 6s linear infinite;
+}
+
+@keyframes rotateGlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ===== HAMBURGER ===== */
+.hamburger {
+  display: none;
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  font-size: 22px;
+  cursor: pointer;
 }
 
 /* ===== MOBILE ===== */
 @media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    left: -260px;
+    top: 0;
+    height: 100%;
+    z-index: 1000;
+  }
+
+  .sidebar.active {
+    left: 0;
+  }
+
+  .hamburger {
+    display: block;
+  }
+
   body {
     flex-direction: column;
   }
-  .sidebar {
-    width: 100%;
-    flex-direction: row;
-    overflow-x: auto;
-  }
-  .nav {
-    display: flex;
-  }
-  .nav a {
-    margin-right: 10px;
+
+  .main {
+    padding: 80px 20px;
   }
 }
 </style>
@@ -118,14 +173,20 @@ body {
 
 <body>
 
-<div class="sidebar">
+<div class="hamburger" onclick="toggleMenu()">
+  <i class="fas fa-bars"></i>
+</div>
+
+<div class="sidebar" id="sidebar">
   <div>
     <div class="logo">BRETT</div>
     <div class="nav">
-      <a href="#">Dashboard</a>
-      <a href="downloadcenter.html">Download Center</a>
-      <a href="#">Projekte</a>
-      <a href="#">Einstellungen</a>
+      <a href="#"><i class="fas fa-home"></i> Home</a>
+      <a href="https://brett2025brett.github.io/BrettWebsite/downloadcenter.html">
+        <i class="fas fa-download"></i> Downloads
+      </a>
+      <a href="#"><i class="fas fa-folder"></i> Projekte</a>
+      <a href="#"><i class="fas fa-user"></i> Account</a>
     </div>
   </div>
 
@@ -135,19 +196,28 @@ body {
 </div>
 
 <div class="main">
+  <h1 style="margin-bottom:30px;">Premium Dashboard</h1>
+
+  <div class="cards">
+    <div class="card">
+      <h3>Aktive Projekte</h3>
+      <div class="stat" id="projects">0</div>
+    </div>
+
+    <div class="card">
+      <h3>Downloads</h3>
+      <div class="stat" id="downloads">0</div>
+    </div>
+
+    <div class="card">
+      <h3>Account Status</h3>
+      <div class="stat">Aktiv</div>
+    </div>
+  </div>
+
   <div class="card">
-    <h2>Willkommen</h2>
+    <h3>Willkommen</h3>
     <p id="user"></p>
-  </div>
-
-  <div class="card">
-    <h2>System Status</h2>
-    <p>BRETT System läuft stabil 🚀</p>
-  </div>
-
-  <div class="card">
-    <h2>Neuigkeiten</h2>
-    <p>Neue Updates und Downloads sind verfügbar.</p>
   </div>
 </div>
 
@@ -169,6 +239,31 @@ const userEl = document.getElementById("user");
 document.getElementById("logoutBtn").onclick = async () => {
   await logout();
   window.location.href = "loginUI.html";
+};
+
+// Fake Live Stats Animation
+function animateValue(id, end, duration) {
+  let start = 0;
+  let range = end - start;
+  let current = start;
+  let increment = end > start ? 1 : -1;
+  let stepTime = Math.abs(Math.floor(duration / range));
+  let obj = document.getElementById(id);
+  let timer = setInterval(function() {
+    current += increment;
+    obj.textContent = current;
+    if (current == end) {
+      clearInterval(timer);
+    }
+  }, stepTime);
+}
+
+animateValue("projects", 12, 1000);
+animateValue("downloads", 348, 1500);
+
+// Mobile Toggle
+window.toggleMenu = function() {
+  document.getElementById("sidebar").classList.toggle("active");
 };
 </script>
 
