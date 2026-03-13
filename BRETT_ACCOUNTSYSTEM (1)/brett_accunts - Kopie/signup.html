@@ -8,7 +8,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 html, body {
   height: 100%;
@@ -23,6 +25,7 @@ body {
   background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
 }
 
+/* Card */
 .box {
   width: 420px;
   padding: 40px;
@@ -40,9 +43,14 @@ body {
   to {opacity:1; transform: translateY(0);}
 }
 
-h1 { margin: 0 0 10px 0; font-weight: 600; }
+h1 {
+  margin: 0 0 10px 0;
+  font-weight: 600;
+}
 
-p { margin: 5px 0; }
+p {
+  margin: 5px 0;
+}
 
 hr {
   border: none;
@@ -51,7 +59,10 @@ hr {
   margin: 20px 0;
 }
 
-label { font-size: 14px; opacity: 0.8; }
+label {
+  font-size: 14px;
+  opacity: 0.8;
+}
 
 input {
   width: 100%;
@@ -64,6 +75,11 @@ input {
   background: rgba(255,255,255,0.15);
   color: white;
   font-size: 14px;
+  transition: 0.3s;
+}
+
+input:focus {
+  background: rgba(255,255,255,0.25);
 }
 
 .btn {
@@ -76,15 +92,28 @@ input {
   cursor: pointer;
   background: linear-gradient(135deg, #00c6ff, #0072ff);
   color: white;
+  transition: 0.3s;
 }
 
-.newsletter {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 18px;
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 114, 255, 0.4);
+}
+
+a {
+  color: #00c6ff;
+  text-decoration: none;
   font-size: 14px;
 }
+
+a:hover {
+  text-decoration: underline;
+}
+
+.rot { color: #ff6b6b; }
+.blau { color: #4fc3f7; }
+.gruen { color: #4caf50; }
+.orangefarbig { color: #ffa726; }
 
 .loader {
   border: 5px solid rgba(255,255,255,0.2);
@@ -106,84 +135,60 @@ input {
 <body>
 
 <div class="box">
-<p><strong>BRETT Login-System</strong></p>
-<hr>
+  <p class="gruen"><strong>BRETT Login-System</strong></p>
+  <p class="blau">Wir freuen uns sehr, dass Sie ein neues Konto erstellen wollen!</p>
+  <hr>
 
-<h1>Registrieren</h1>
+  <h1>Registrieren</h1>
 
-<label for="email">E-Mail</label>
-<input id="email" type="email" placeholder="beispiel@email.com">
+  <label for="email">E-Mail</label>
+  <input id="email" type="email" placeholder="beispiel@email.com">
 
-<label for="password">Passwort</label>
-<input id="password" type="password" placeholder="••••••••">
+  <label for="password">Passwort</label>
+  <input id="password" type="password" placeholder="••••••••">
 
-<div class="newsletter">
-<input type="checkbox" id="newsletter">
-<label for="newsletter">Für Newsletter anmelden</label>
-</div>
+  <p id="msg" class="rot"></p>
 
-<p id="msg"></p>
+  <button id="signupBtnEINS" class="btn">Registrieren</button>
+  <div id="spinner" class="loader" style="display:none;"></div>
 
-<button id="signupBtnEINS" class="btn">Registrieren</button>
-<div id="spinner" class="loader" style="display:none;"></div>
-
+  <br><br>
+  <a href="logonUI.html">Haben Sie bereits ein Konto? Anmelden!</a>
 </div>
 
 <script type="module">
-import { signUp, getSession } from "./auth.js";
+  import { signUp, getSession } from "./auth.js";
 
-const emailField = document.getElementById("email");
-const passwordField = document.getElementById("password");
-const newsletter = document.getElementById("newsletter");
+  const emailField = document.getElementById("email");
+  const passwordField = document.getElementById("password");
+  const msg = document.getElementById("msg");
+  const signupBtn = document.getElementById("signupBtnEINS");
+  const spinner = document.getElementById("spinner");
 
-const msg = document.getElementById("msg");
-const signupBtn = document.getElementById("signupBtnEINS");
-const spinner = document.getElementById("spinner");
+  signupBtn.addEventListener("click", async () => {
+    msg.textContent = "";
 
-signupBtn.addEventListener("click", async () => {
+    emailField.style.display = "none";
+    passwordField.style.display = "none";
+    signupBtn.style.display = "none";
+    spinner.style.display = "block";
 
-msg.textContent = "";
+    try {
+      await signUp(emailField.value, passwordField.value);
+      window.location.href = "signupsucess.html";
+    } catch (err) {
+      msg.textContent = err.message;
+      emailField.style.display = "block";
+      passwordField.style.display = "block";
+      signupBtn.style.display = "block";
+      spinner.style.display = "none";
+    }
+  });
 
-emailField.style.display = "none";
-passwordField.style.display = "none";
-signupBtn.style.display = "none";
-spinner.style.display = "block";
-
-try {
-
-await signUp(emailField.value, passwordField.value);
-
-if(newsletter.checked){
-
-fetch("BRETT_ACCOUNTSYSTEM (1)/brett_accunts - Kopie/newsletter.php",{
-method:"POST",
-headers:{'Content-Type':'application/json'},
-body:JSON.stringify({
-email:emailField.value
-})
-});
-
-}
-
-window.location.href = "signupsucess.html";
-
-} catch (err) {
-
-msg.textContent = err.message;
-
-emailField.style.display = "block";
-passwordField.style.display = "block";
-signupBtn.style.display = "block";
-spinner.style.display = "none";
-
-}
-
-});
-
-(async () => {
-const session = await getSession();
-if (session) window.location.href = "dashboard.html";
-})();
+  (async () => {
+    const session = await getSession();
+    if (session) window.location.href = "dashboard.html";
+  })();
 </script>
 
 </body>
