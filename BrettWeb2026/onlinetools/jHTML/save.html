@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Speichern</title>
+</head>
+<body>
+<p>Wie möchten Sie Ihren Code speichern?</p>
+<button type="button" id="MitURL" onclick="UrlExit();">Mit URL speichern</button>
+<button type="button" id="file" onclick="FileExit();">Mit Datei speichern (empfohlen)</button>
+<button type="button" id="back" onclick="window.close();">Zurück</button>
+
+<script>
+function getURLParameter(name) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(name);
+}
+
+const textParam = getURLParameter('text');
+let code;
+if (textParam) {
+    code = decodeURIComponent(textParam);
+} else {
+    alert("Lokaler Fehler beim Aufruf dieser Seite: die übergebenen Argumente können nicht als Wert (null) bezeichnet werden.");
+    window.close();
+}
+
+const nameParam = getURLParameter('name');
+let ThisName;
+if (nameParam) {
+    ThisName = decodeURIComponent(nameParam);
+} else {
+    ThisName = "OhneName";
+}
+
+function UrlExit() {
+    navigator.clipboard.writeText(`file:///C:/Users/Jonas/Desktop/MeineProgramme/jHTML/Editor.html?text=${encodeURIComponent(code)}&name=${encodeURIComponent(ThisName)}`)
+        .then(function() {
+            console.log('URL erfolgreich in die Zwischenablage kopiert!');
+        })
+        .catch(function(err) {
+            console.error('Fehler beim Kopieren in die Zwischenablage: ', err);
+        });
+}
+
+function FileExit() {
+    const htmlContent = `<html><body>${code}</body></html>`;
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${ThisName}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+</script>
+
+<style>
+/* Optional: Stil für das Iframe, falls gewünscht */
+#outputCode {
+    border: 1px solid #000; /* Rahmen für das Iframe */
+}
+</style>
+</body>
+</html>

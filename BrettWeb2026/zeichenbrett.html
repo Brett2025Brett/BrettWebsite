@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BRETT Enterprise SaaS - LEVEL 7</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<link rel="stylesheet" href="style.css">
+<style>
+.download-button{
+  padding:15px 30px;
+  background:#00f2ff;
+  color:black;
+  font-size:1rem;
+  border:none;
+  border-radius:50px;
+  cursor:pointer;
+  box-shadow:0 4px 10px rgba(0,242,255,0.3);
+  transition:all 0.3s ease;
+}
+.download-button:hover{
+  background:#00aaff;
+  transform:scale(1.05);
+  color:white;
+}
+
+</style>
+</head>
+
+<body>
+<canvas id="particles"></canvas>
+
+<div class="hamburger" onclick="toggleMenu()">
+<i class="fas fa-bars"></i>
+</div>
+
+<div class="sidebar" id="sidebar">
+  <div>
+    <div class="logo">BRETT</div>
+    <div class="nav">
+      <a href="mainpage.html"><i class="fas fa-home"></i> Willkommen</a>
+      <a href="downloadcenter_new.html"><i class="fas fa-download"></i> Downloads</a>
+  <a href="Online-tools.html"><i class="fas fa-tools"></i> Onlinetools</a>
+      <a href="Lizenz.html"><i class="fas fa-file-contract"></i> Lizenz</a>
+    </div>
+  </div>
+  <div class="logout">
+    <button id="logoutBtn">Logout</button>
+  </div>
+</div>
+
+<div class="main">
+
+<h1 style="margin-bottom:30px;">Zeichenbrett Pro: Download und Infos</h1>
+
+<div class="grid" id="grid">
+
+<div class="card" draggable="true" data-id="1">
+Mit Zeichenbrett Pro könnt ihr tolle Kunstwerke malen.
+</div>
+
+<div class="card" draggable="true" data-id="2">
+<button class="download-button" onclick="window.open('zeichenbrettprobrettportable.zip')">Portable herunterladen (ZIP)</button>
+</div>
+
+<div class="card" draggable="true" data-id="3">
+<p>Programm erstellt von Jonas (2025), hochgeladen von Simon (2025), Text geschrieben von Jonas (2025)</p>
+</div>
+<br>
+<div class="card" draggable="true" data-id="4">
+<img src="screenshots/Zeichenbrett_Screenshot.png" height="200" length="290">
+</div>
+<div class="card" draggable="true" data-id="5" length="400">
+<h4>Zusatzinformation:</h4>
+<p>Die Geschichte von Zeichenbrett - Eine kurze Zusammenfassung</p><br>
+<p>Unser erstes Programm war Zeichenbrett - wir überlegten lange, wie wir es nennen sollten, 
+aber Zeichenbrett setzte sich durch. Wir arbeiteten lange daran und waren sehr zufrieden, bis wir eines
+Tages im Sommer auf die Idee kamen, unterschiedliche Versionen für Zeichenbrett anzubieten, Zeichenbrett Dev war für Entwickler angepasst, Honas arbeitete an ihm und Zeichenbrett Beta für Zeichenprofis,
+Simon war der Entwickler. Außerdem planten wir zeichenbrett Canary, das aber nie wirklich verwirklicht wurde. Gesagt, getan, schon waren die unterschiedlichen Editions online - aber zugegeben, ein paar
+Monate nahm die Entwicklung schon in Anspruch. ein Jahr später war schon eine richtige Konkurrenz da, damals wurde das gsnze in TurboWarp gebaut. Jeder wollte das bessere und komplexere Projekt führen.
+aber dann kamen wir auf die Idee, dass es gut wäre, wenn wir Zeichenbrett dev und Beta wieder vereinen würden. Und das taten wir dann auch, zwei Tage später gab es die erste Vorabversion von Zeichenbrett 
+Pro!Jonas programmierte es in C# mit  Winforms und wir planen es mit WinUI erneut zu schreiben um die Oberfläche zu modernisieren   ---von Jonas
+</div>
+
+
+
+
+
+</div>
+
+
+</div>
+</div>
+
+<script type="module">
+  import { setupAuthUI } from "./auth.js";
+  setupAuthUI();
+</script>
+
+
+<script src="particles.js"></script>
+
+</body>
+</html>
