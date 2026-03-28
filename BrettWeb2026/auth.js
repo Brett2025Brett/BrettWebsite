@@ -86,5 +86,5 @@ async function sendRating(value) {
   }
 }
 
-
+window.toggleMenu=function(){document.getElementById("sidebar").classList.toggle("active");};
 
