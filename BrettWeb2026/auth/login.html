@@ -183,7 +183,7 @@ a:hover {
     try {
       await login(emailField.value, passwordField.value);
       msg.textContent = "Login erfolgreich. Weiterleitung...";
-      setTimeout(() => window.location.href = "https://brett2025brett.github.io/BrettWebsite/BrettWeb2026/mainpage.html", 1000);
+      setTimeout(() => window.location.href = "/BrettWebsite/BrettWeb2026/mainpage.html", 1000);
     } catch (err) {
       msg.textContent = err.message;
       emailField.style.display = "block";
@@ -197,7 +197,7 @@ a:hover {
 
   (async () => {
     const session = await getSession();
-    if (session) window.location.href = "https://brett2025brett.github.io/BrettWebsite/BrettWeb2026/mainpage.html";
+    if (session) window.location.href = "/BrettWebsite/BrettWeb2026/mainpage.html";
   })();
 </script>
 
