@@ -175,7 +175,7 @@ a:hover {
 
     try {
       await signUp(emailField.value, passwordField.value);
-      window.location.href = "signupsucess.html";
+      window.location.href = "https://brett2025brett.github.io/BrettWebsite/BrettWeb2026/auth/signupsucess.html";
     } catch (err) {
       msg.textContent = err.message;
       emailField.style.display = "block";
@@ -187,7 +187,7 @@ a:hover {
 
   (async () => {
     const session = await getSession();
-    if (session) window.location.href = "mainpage.html";
+    if (session) window.location.href = "https://brett2025brett.github.io/BrettWebsite/BrettWeb2026/mainpage.html";
   })();
 </script>
 
