@@ -87,4 +87,25 @@ async function sendRating(value) {
 }
 
 window.toggleMenu=function(){document.getElementById("sidebar").classList.toggle("active");};
+function setFavicon(url) {
+    const head = document.head;
+
+    // alte Icons entfernen
+    document.querySelectorAll("link[rel='icon'], link[rel='shortcut icon']")
+        .forEach(e => e.remove());
+
+    // neues Icon hinzufügen
+    const link = document.createElement("link");
+    link.rel = "icon";
+    link.href = url;
+    head.appendChild(link);
+}
+
+
+let toggle = false;
+
+setInterval(() => {
+    setFavicon(toggle ? "icon1.png" : "icon2.png");
+    toggle = !toggle;
+}, 1000);
 
