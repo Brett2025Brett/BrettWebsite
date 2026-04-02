@@ -86,13 +86,25 @@ async function sendRating(value) {
   }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  let toggle = false;
+window.toggleMenu=function(){document.getElementById("sidebar").classList.toggle("active");};
+function setFavicon(url) {
+    const head = document.head;
 
-  setInterval(() => {
-    setGlobalLogo(
-      toggle ? "BrettWeb2026/icon2.png" : "BrettWeb2026/icon1.jpeg"
-    );
+    // alte Icons entfernen
+    document.querySelectorAll("link[rel='icon'], link[rel='shortcut icon']")
+        .forEach(e => e.remove());
+
+    // neues Icon hinzufügen
+    const link = document.createElement("link");
+    link.rel = "icon";
+    link.href = url;
+    head.appendChild(link);
+}
+
+
+let toggle = false;
+
+setInterval(() => {
+    setFavicon(toggle ? "BrettWeb2026/icon2.png" : "BrettWeb2026/icon1.jpeg");
     toggle = !toggle;
-  }, 2000);
-});
+}, 1000);
