@@ -105,7 +105,7 @@ function setFavicon(url) {
 let toggle = false;
 
 setInterval(() => {
-    setFavicon(toggle ? "icon1.png" : "icon2.png");
+    setFavicon(toggle ? "BrettWeb2026/icon2.png" : "BrettWeb2026/icon1.jpeg");
     toggle = !toggle;
 }, 1000);
 
