@@ -63,7 +63,7 @@ BRETTBrowser ist der Browser von BRETT. Wir haben ihn 2024 gestartet und wir hab
 </div>
 
 <div class="card" draggable="true" data-id="2">
-<button class="download-button" onclick="window.open('https://1drv.ms/u/c/2899B0204F56899A/IQCyinmzoG9HSpyCmXHSQGhTAd0yvIrUHXJmh9k0Mdkl5Uc?e=eIzi0c')">Portable herunterladen (ZIP)</button>
+<button class="download-button" onclick="downloadBrettWebViewer()">Portable herunterladen (ZIP)</button>
 </div>
 
 <div class="card" draggable="true" data-id="3">
@@ -75,8 +75,20 @@ BRETTBrowser ist der Browser von BRETT. Wir haben ihn 2024 gestartet und wir hab
 </div>
 
 
+<script>
+  function downloadBrettWebViewer() {
+   
+    const url = "https://github.com/brett2025brett/BrettWebsite/releases/download/BrettBrowser/Release.zip";
 
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "";   // Browser versucht Download zu erzwingen
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
 
+  }
+</script>
 
 
 
