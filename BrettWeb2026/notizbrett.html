@@ -64,7 +64,7 @@ Notizbrett ist eine Anwendung , mit der sie sehr einfach Notizen erstellen könn
 
 <div class="card" draggable="true" data-id="2">
 <button class="download-button" onclick="window.open('https://brett2025brett.github.io/BrettWebsite/Notizbrett.html')">Online ausprobieren</button>
-<button class="download-button" onclick="window.open('https://1drv.ms/u/c/2899B0204F56899A/IQDdDu29rXSxTojiltCGNoc8AbAhvmUyfv4bHUGiXSLvbgs?e=v56Cmo')">Portable herunterladen (ZIP)</button>
+<button class="download-button" onclick="window.open('downloadNotizbrett()')">Portable herunterladen (ZIP)</button>
 <button class="download-button" onclick="window.open('https://1drv.ms/u/c/2899B0204F56899A/IQCp9uvp7liAQKT9JoOFvdjOAd-ClHnjz47996w59BV5bHM?e=meBYfi')">Setup herunterladen</button>
 <br>
 <p>Das Setup ist noch in der BETA-Phase und funktioniert auf manchen Geräten nicht. wir arbeiten daran!</p>
@@ -96,6 +96,17 @@ Notizbrett ist eine Anwendung , mit der sie sehr einfach Notizen erstellen könn
 
 
 <script src="particles.js"></script>
+<script>
+  function downloadNotizbrett() {
+    const url = "https://release-assets.githubusercontent.com/github-production-release-asset/1123618970/f49b15b5-af43-4133-a1a6-1bf4c001d5e4?sp=r&sv=2018-11-09&sr=b&spr=https&se=2026-04-04T11%3A53%3A58Z&rscd=attachment%3B+filename%3DNotizbrett.zip&rsct=application%2Foctet-stream&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2026-04-04T10%3A53%3A53Z&ske=2026-04-04T11%3A53%3A58Z&sks=b&skv=2018-11-09&sig=zqxb7phbO4p5q3t9xMn2SaBgGlbtB%2FsHHLwQwZnVgtQ%3D&jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmVsZWFzZS1hc3NldHMuZ2l0aHVidXNlcmNvbnRlbnQuY29tIiwia2V5Ijoia2V5MSIsImV4cCI6MTc3NTMwMTkwOSwibmJmIjoxNzc1MzAwMTA5LCJwYXRoIjoicmVsZWFzZWFzc2V0cHJvZHVjdGlvbi5ibG9iLmNvcmUud2luZG93cy5uZXQifQ.esXaBRVyC2To95F8J4G6fUewfkjp9P4EgZkm-kYKMNk&response-content-disposition=attachment%3B%20filename%3DNotizbrett.zip&response-content-type=application%2Foctet-stream";
 
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "";   // Browser versucht Download zu erzwingen
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+}
+</script>
 </body>
 </html>
