@@ -60,12 +60,13 @@
 
 <div class="card" draggable="true" data-id="1">
 Musikbrett ist unser Musikprogramm. Mit ihm könnt ihr ganz einfach tolle Musik erstellen.
+  Info: Für dieses Programm gibt es kein Setup mehr.
 </div>
 
 <div class="card" draggable="true" data-id="2">
-<button class="download-button" onclick="window.open('https://1drv.ms/u/c/2899B0204F56899A/IQD9UbsvXgOMQ5rrInlZCBlWAZZPIXmxu_raWpc5tkch17Y?e=sF2gId')">Portable herunterladen (ZIP)</button>
+<button class="download-button" onclick="downloadMusikBrett()">Portable herunterladen (ZIP)</button>
 <button class="download-button" onclick="window.open('https://brett2025brett.github.io/BrettWebsite/musikbrett_dev.html')">Online ausprobieren</button>
-<button class="download-button" onclick="window.open('https://1drv.ms/u/c/2899B0204F56899A/IQCp9uvp7liAQKT9JoOFvdjOAd-ClHnjz47996w59BV5bHM?e=meBYfi')">Setup herunterladen</button>
+
 </div>
 
 <div class="card" draggable="true" data-id="3">
@@ -76,7 +77,17 @@ Musikbrett ist unser Musikprogramm. Mit ihm könnt ihr ganz einfach tolle Musik 
 <img src="screenshots/Musikbrett-Screenshot.png" height="200" length="290">
 </div>
 
+<script>
+  function downloadMusikBrett() {
+    const url = "https://github.com/Brett2025Brett/BrettWebsite/releases/download/Musikbrett/musict.1.zip";
 
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "";   // Browser versucht Download zu erzwingen
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
 
 
 
