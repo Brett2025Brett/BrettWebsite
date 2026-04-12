@@ -1,0 +1,100 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BRETT Spiele</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<link rel="stylesheet" href="style.css">
+<style>
+.download-button{
+  padding:15px 30px;
+  background:#00f2ff;
+  color:black;
+  font-size:1rem;
+  border:none;
+  border-radius:50px;
+  cursor:pointer;
+  box-shadow:0 4px 10px rgba(0,242,255,0.3);
+  transition:all 0.3s ease;
+}
+.download-button:hover{
+  background:#00aaff;
+  transform:scale(1.05);
+  color:white;
+}
+
+</style>
+</head>
+
+<body>
+<canvas id="particles"></canvas>
+
+<div class="hamburger" onclick="toggleMenu()">
+<i class="fas fa-bars"></i>
+</div>
+
+<div class="sidebar" id="sidebar">
+  <div>
+    <div class="logo">BRETT</div>
+    <div class="nav">
+      <a href="mainpage.html"><i class="fas fa-home"></i> Willkommen</a>
+      <a href="downloadcenter_new.html"><i class="fas fa-download"></i> Downloads</a>
+  <a href="Online-tools.html"><i class="fas fa-tools"></i> Onlinetools</a>
+      <a href="Lizenz.html"><i class="fas fa-file-contract"></i> Lizenz</a>
+       <a href="brett-spiele.html"><i class="fas fa-file-game"></i> Spiele</a>
+    </div>
+  </div>
+  <div class="logout">
+    <button id="logoutBtn">Logout</button>
+  </div>
+</div>
+
+<div class="main">
+
+<h1 style="margin-bottom:30px;"></h1>
+
+<div class="grid" id="grid">
+
+<div class="card" draggable="true" data-id="1">
+Ihr kennt bestimmt noch unsere tollen Onlinetools! Sie sind nützliche Tools, die man ganz einfach online hier ausführen kann. Es sind eigentlich die alten, nur mit neuen Design.
+Es kommen laufend welche dazu.
+</div>
+
+<div class="card" draggable="true" data-id="2">
+Führen sie die Onlinetool aus!
+<button class="download-button" onclick="window.open('onlinetools/unicodeexplore.html')">Unicode-Explorer</button>
+<button class="download-button" onclick="window.open('onlinetools/keygenerate.html')">Passwortgenerator</button>
+<button class="download-button" onclick="window.open('onlinetools/superrandom.html')">Zufallsstringgenerator</button>
+<button class="download-button" onclick="window.open('onlinetools/learn.html')">Multi-Sprachen-Editor</button>
+<button class="download-button" onclick="window.open('onlinetools/htmledit.html')">HTML-Editor</button>
+</div>
+<div class="card" draggable="true" data-id="3">
+<p>Alle Onlinetools wurden von Jonas erstellt, bis auf HTML-Editor von Simon, dessen Design von Jonas überarbeitet wurde.</p>
+</div>
+
+
+
+
+
+
+</div>
+
+
+</div>
+</div>
+
+<script type="module">
+  import { setupAuthUI } from "./auth.js";
+  setupAuthUI();
+</script>
+
+
+<script src="particles.js"></script>
+
+</body>
+</html>
