@@ -1,0 +1,898 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Hurlum Rätsel — Kontextsensitives Inventar mit Hinweis</title>
+<style>
+  html,body{height:100%;margin:0;background:#05040a;color:#e6f7ff;font-family:Inter,Arial,Helvetica,sans-serif;}
+  #container{width:100%;height:100%;position:relative;overflow:hidden;}
+  canvas{display:block;}
+  #hud{position:absolute;right:18px;top:18px;width:380px;pointer-events:none;z-index:4;}
+  .panel{background:linear-gradient(180deg, rgba(0,0,0,0.55), rgba(0,0,0,0.45));padding:10px;border-radius:8px;margin-bottom:10px;pointer-events:auto;backdrop-filter: blur(4px);}
+  #log{height:120px;overflow:auto;font-size:13px;padding:6px;background:rgba(255,255,255,0.02);border-radius:6px;}
+  #inventory{display:none;background:rgba(0,0,0,0.6);padding:8px;border-radius:6px;max-height:220px;overflow:auto;pointer-events:auto;}
+  .item{padding:6px;border-radius:6px;background:rgba(255,255,255,0.02);margin:6px 0;cursor:pointer;user-select:none;}
+  .item.disabled{opacity:0.36;cursor:not-allowed;}
+  .selectedBadge{display:inline-block;background:rgba(100,180,220,0.12);padding:6px;border-radius:6px;margin-top:6px;font-size:13px;border:1px solid rgba(143,188,212,0.12);}
+  #allowedList{margin-top:8px;font-size:13px;color:#cfeffd;}
+  #message{position:absolute;left:50%;top:10%;transform:translateX(-50%);background:rgba(6,8,10,0.85);color:#eaf6ff;padding:12px 16px;border-radius:10px;display:none;pointer-events:none;z-index:5;}
+  #startOverlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(6,6,10,0.6),rgba(2,2,6,0.9));z-index:6;}
+  #startOverlay .box{background:linear-gradient(180deg, rgba(12,10,18,0.95), rgba(6,6,10,0.9));padding:20px;border-radius:10px;text-align:center;color:#dfeff6;}
+  button{background:#2a7b9a;color:white;border:0;padding:10px 14px;border-radius:8px;cursor:pointer;}
+  #crosshair{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:12px;height:12px;pointer-events:none;z-index:3;}
+  #crosshair:before{content:"";position:absolute;left:50%;top:50%;width:2px;height:12px;background:rgba(255,255,255,0.6);transform:translate(-50%,-50%);}
+  #crosshair:after{content:"";position:absolute;left:50%;top:50%;width:12px;height:2px;background:rgba(255,255,255,0.6);transform:translate(-50%,-50%);}
+  .hint{font-size:13px;color:#bfe8ff;margin-top:6px;}
+</style>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.152.2/build/three.module.js",
+    "three/controls/PointerLockControls": "https://unpkg.com/three@0.152.2/examples/jsm/controls/PointerLockControls.js"
+  }
+}
+</script>
+</head>
+<body>
+<div id="container"></div>
+
+<div id="hud">
+  <div class="panel">
+    <strong>Steuerung</strong>
+    <div style="margin-top:6px">W A S D — bewegen · Maus — schauen · E — interagieren · I — Inventar · 1–9 — Primär · Shift+1–9 — Sekundär · F — Raum verlassen · R — Neustart</div>
+  </div>
+
+  <div class="panel">
+    <strong>Log</strong>
+    <div id="log">Du stehst auf dem Dorfplatz. Ein Brunnen plätschert. Zwei Häuser blicken auf den Platz.</div>
+  </div>
+
+  <div class="panel">
+    <strong>Inventar (kontextsensitiv)</strong>
+    <div id="inventory">Keine Gegenstände.</div>
+    <div id="allowedList">Erlaubte Items: <span id="allowedNames">—</span></div>
+    <div id="selectedHUD" class="selectedBadge" style="display:none;">Ausgewählt: —</div>
+    <div class="hint">Nur passende Items sind auswählbar, wenn du nahe an einem Pedestal stehst.</div>
+  </div>
+
+  <div class="panel">
+    <strong>Tipps</strong>
+    <div>- Schild zeigt Hinweise. - Bücher/Truhen geben Items. - Pedestale benötigen Kombinationen.</div>
+    <footer>Stil: Hurlum‑inspiriert · Permadeath aktiviert</footer>
+  </div>
+</div>
+
+<div id="message"></div>
+<div id="crosshair"></div>
+
+<div id="startOverlay">
+  <div class="box">
+    <h2>Mystisches Rätsel auf Hurlum</h2>
+    <p>Drücke Start und klicke ins Spiel, um die Maus zu sperren. Permadeath ist aktiv.</p>
+    <button id="startBtn">Start</button>
+  </div>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { PointerLockControls } from 'three/controls/PointerLockControls';
+
+/* -------------------------
+   UI / State
+   ------------------------- */
+const container = document.getElementById('container');
+const logEl = document.getElementById('log');
+const invEl = document.getElementById('inventory');
+const allowedNamesEl = document.getElementById('allowedNames');
+const selectedHUD = document.getElementById('selectedHUD');
+const msgEl = document.getElementById('message');
+const startOverlay = document.getElementById('startOverlay');
+const startBtn = document.getElementById('startBtn');
+
+let scene, camera, renderer, controls, raycaster;
+let objects = [];
+let envCrystals = [];
+let envKeys = [];
+let houses = [];
+let state = {
+  inventory: [],
+  selectedInventoryIndices: [],
+  alive: true,
+  inRoom: null,
+  solved: { library:false, guard:false },
+  playerStart: new THREE.Vector3(0, 1.8, 8),
+  outsidePosition: new THREE.Vector3(0,1.8,8),
+  pedestals: { library:false, guard:false }
+};
+
+let prevPlayerPos = new THREE.Vector3();
+
+init();
+const clock = new THREE.Clock();
+animate();
+
+/* -------------------------
+   Szene initialisieren
+   ------------------------- */
+function init(){
+  renderer = new THREE.WebGLRenderer({ antialias:true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setClearColor(0x0b0710);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  container.appendChild(renderer.domElement);
+
+  scene = new THREE.Scene();
+
+  // Sky
+  const skyGeo = new THREE.SphereGeometry(120, 32, 16);
+  const skyMat = new THREE.ShaderMaterial({
+    side: THREE.BackSide,
+    uniforms: { topColor: { value: new THREE.Color(0xffb07a) }, bottomColor: { value: new THREE.Color(0x2b1b3a) } },
+    vertexShader: `varying vec3 vPos; void main(){ vPos = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+    fragmentShader: `uniform vec3 topColor; uniform vec3 bottomColor; varying vec3 vPos; void main(){ float t = smoothstep(-1.0, 1.0, vPos.y); vec3 col = mix(bottomColor, topColor, t); gl_FragColor = vec4(col, 1.0); }`
+  });
+  const sky = new THREE.Mesh(skyGeo, skyMat); sky.rotation.y = Math.PI * 0.2; scene.add(sky);
+
+  // Kamera & Controls
+  camera = new THREE.PerspectiveCamera(62, window.innerWidth/window.innerHeight, 0.1, 300);
+  camera.position.copy(state.playerStart);
+  controls = new PointerLockControls(camera, renderer.domElement);
+  controls.getObject().position.copy(state.playerStart);
+
+  // Licht
+  const key = new THREE.DirectionalLight(0xffcaa3, 1.0); key.position.set(-6, 12, -4); key.castShadow = true; scene.add(key);
+  const fill = new THREE.HemisphereLight(0x9fd6e8, 0x2b1b3a, 0.45); scene.add(fill);
+  scene.fog = new THREE.FogExp2(0x0b0710, 0.028);
+
+  // Boden
+  const groundMat = new THREE.MeshStandardMaterial({ color:0x2f2b2e, roughness:1 });
+  const groundGeo = new THREE.PlaneGeometry(160,160, 64,64);
+  for(let i=0;i<groundGeo.attributes.position.count;i++){
+    const y = (Math.random()-0.5) * 0.6;
+    groundGeo.attributes.position.setY(i, y);
+  }
+  groundGeo.computeVertexNormals();
+  const ground = new THREE.Mesh(groundGeo, groundMat); ground.rotation.x = -Math.PI/2; ground.receiveShadow = true; scene.add(ground);
+
+  // Plaza & Brunnen
+  const plaza = new THREE.Mesh(new THREE.CylinderGeometry(12,12,0.6,64), new THREE.MeshStandardMaterial({ color:0x3a3336 }));
+  plaza.position.set(0,0.3,0); plaza.receiveShadow = true; scene.add(plaza);
+  const fountain = makeFountain(); fountain.name='fountain'; fountain.userData={type:'fountain'}; fountain.position.set(0,0.6,0); scene.add(fountain); objects.push(fountain);
+
+  // Häuser (Bibliothek und Wachhaus)
+  const house1 = makeHouse(-18,0,-6,'Bibliothek','house1');
+  house1.userData={type:'house',id:'house1',interiorAnchor:new THREE.Vector3(-18,0,-6)};
+  scene.add(house1); objects.push(house1); houses.push(house1);
+
+  const house2 = makeHouse(18,0,-6,'Wachhaus','house2');
+  house2.userData={type:'house',id:'house2',interiorAnchor:new THREE.Vector3(18,0,-6)};
+  scene.add(house2); objects.push(house2); houses.push(house2);
+
+  // Schild, Pit, Altar
+  const sign = makeSign(6,0,10,'Suche das Licht in den Büchern.'); sign.userData={type:'sign'}; scene.add(sign); objects.push(sign);
+  const pit = makePit(-4,0,12); pit.userData={type:'hazard'}; scene.add(pit); objects.push(pit);
+  const altar = makeAltar(0,0.6,-10); altar.userData={type:'altar',portalCreated:false}; scene.add(altar); objects.push(altar);
+
+  // Umweltkristalle
+  spawnEnvCrystal(4,0.6,-4,'blue');
+  spawnEnvCrystal(-8,0.6,6,'green');
+  spawnEnvCrystal(10,0.6,10,'blue');
+  spawnEnvCrystal(-12,0.6,-8,'green');
+
+  // Raycaster & Input
+  raycaster = new THREE.Raycaster();
+  setupMovement();
+  window.addEventListener('resize', onWindowResize);
+  window.addEventListener('keydown', onKeyDownGlobal);
+
+  // Inventory click selection (when inventory open)
+  invEl.addEventListener('click', (ev) => {
+    const target = ev.target.closest('.item');
+    if (!target) return;
+    const idx = Number(target.dataset.idx);
+    if (!Number.isFinite(idx)) return;
+    const ped = getNearbyPedestal(2.2);
+    if (!ev.shiftKey) setPrimarySelection(idx, ped);
+    else toggleSecondarySelection(idx, ped);
+  });
+
+  // Start
+  startBtn.addEventListener('click', ()=>{ startOverlay.style.display='none'; controls.lock(); });
+  controls.addEventListener('lock', ()=> showMessage('Maus gesperrt. Nutze WASD, Shift, E, I, F, 1–9.'));
+  controls.addEventListener('unlock', ()=>{ showMessage('Maus freigegeben. Klicke Start.'); startOverlay.style.display=''; });
+
+  pushLog('Du stehst auf dem Dorfplatz. Ein Brunnen plätschert. Zwei Häuser blicken auf den Platz.');
+}
+
+/* -------------------------
+   Objektfabriken
+   ------------------------- */
+function makeFountain(){
+  const g = new THREE.Group();
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(4.2,4.2,1.2,48), new THREE.MeshStandardMaterial({ color:0x3b4b52 }));
+  base.position.y = 0.6; g.add(base);
+  const water = new THREE.Mesh(new THREE.CircleGeometry(2.2,32), new THREE.MeshStandardMaterial({ color:0x7fd6ff, transparent:true, opacity:0.9 }));
+  water.rotation.x = -Math.PI/2; water.position.y = 0.95; g.add(water);
+  return g;
+}
+function makeHouse(x,y,z,label,id){
+  const group = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.BoxGeometry(8,5,6), new THREE.MeshStandardMaterial({ color:0x3a2f28 }));
+  body.position.set(x,2.5,z); group.add(body);
+  const roof = new THREE.Mesh(new THREE.ConeGeometry(5.6,3.2,4), new THREE.MeshStandardMaterial({ color:0x2b1f1a }));
+  roof.position.set(x,6.2,z); roof.rotation.y = Math.PI/4; group.add(roof);
+  const door = new THREE.Mesh(new THREE.BoxGeometry(1.4,2.6,0.2), new THREE.MeshStandardMaterial({ color:0x1f1b18 }));
+  door.position.set(x + (x<0?2.6:-2.6),1.3,z+2.9);
+  door.userData = { isDoor:true, houseId: id };
+  door.name = id + '_door';
+  group.add(door);
+  const canvas = makeTextCanvas(label, 260, 48);
+  const tex = new THREE.CanvasTexture(canvas);
+  const plane = new THREE.Mesh(new THREE.PlaneGeometry(3.6,0.8), new THREE.MeshBasicMaterial({ map:tex, transparent:true }));
+  plane.position.set(x,5.0,z-2.9); group.add(plane);
+  return group;
+}
+function makeSign(x,y,z,text){
+  const canvas = makeTextCanvas(text,360,96); const tex = new THREE.CanvasTexture(canvas);
+  const plane = new THREE.Mesh(new THREE.PlaneGeometry(4.2,1.2), new THREE.MeshBasicMaterial({ map:tex, transparent:true }));
+  plane.position.set(x,1.4,z); plane.rotation.y = Math.PI; return plane;
+}
+function makePit(x,y,z){
+  const mat = new THREE.MeshStandardMaterial({ color:0x05060a });
+  const mesh = new THREE.Mesh(new THREE.CircleGeometry(3.2,32), mat); mesh.rotation.x = -Math.PI/2; mesh.position.set(x,0.02,z); return mesh;
+}
+function makeAltar(x,y,z){
+  const g = new THREE.Group();
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(1.6,1.6,0.6,32), new THREE.MeshStandardMaterial({ color:0x2b2b2b }));
+  base.position.y = 0.6; g.add(base);
+  const bowl = new THREE.Mesh(new THREE.CylinderGeometry(0.8,0.8,0.3,32), new THREE.MeshStandardMaterial({ color:0x1f6b7a, emissive:0x0a2b3a, emissiveIntensity:0.05 }));
+  bowl.position.y = 0.95; g.add(bowl);
+  g.position.set(x,0,z);
+  return g;
+}
+function makeTextCanvas(text,w=256,h=64){
+  const canvas = document.createElement('canvas'); canvas.width=w; canvas.height=h;
+  const ctx = canvas.getContext('2d'); ctx.fillStyle='rgba(12,10,18,0.95)'; ctx.fillRect(0,0,w,h);
+  ctx.fillStyle='#f0fbff'; ctx.font=Math.floor(h*0.22)+'px serif'; ctx.textAlign='center'; wrapText(ctx,text,w/2,h/2+6,w-20,Math.floor(h*0.22));
+  return canvas;
+}
+function wrapText(ctx,text,x,y,maxWidth,lineHeight){
+  const words=text.split(' '); let line='', curY=y-lineHeight;
+  for(let n=0;n<words.length;n++){ const testLine=line+words[n]+' '; const metrics=ctx.measureText(testLine); if(metrics.width>maxWidth && n>0){ curY+=lineHeight; ctx.fillText(line,x,curY); line=words[n]+' '; } else line=testLine; }
+  curY+=lineHeight; ctx.fillText(line,x,curY);
+}
+
+/* -------------------------
+   Kristalle & Schlüssel
+   ------------------------- */
+function createCrystalMesh(hex=0x4fd6ff){
+  const geom = new THREE.OctahedronGeometry(0.45,0);
+  const mat = new THREE.MeshStandardMaterial({ color:hex, emissive:hex, emissiveIntensity:0.9, metalness:0.2, roughness:0.1, transparent:true, opacity:0.95 });
+  const m = new THREE.Mesh(geom,mat); m.castShadow=true; return m;
+}
+function createKeyMesh(){
+  const g = new THREE.Group();
+  const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.06,0.9,8), new THREE.MeshStandardMaterial({ color:0xd4b04a }));
+  shaft.rotation.z=Math.PI/2; g.add(shaft);
+  const head = new THREE.Mesh(new THREE.BoxGeometry(0.28,0.28,0.12), new THREE.MeshStandardMaterial({ color:0xd4b04a })); head.position.set(0.45,0,0); g.add(head);
+  g.scale.setScalar(0.9); g.castShadow=true; return g;
+}
+function spawnEnvCrystal(x,y,z,color='blue'){
+  const hex = color==='green'?0x6bff9a:0x4fd6ff;
+  const c = createCrystalMesh(hex); c.position.set(x,y,z); c.userData={type:'crystal_env',color:color,baseY:y}; scene.add(c); envCrystals.push(c); objects.push(c);
+}
+function spawnKeyAt(x,y,z){
+  const k = createKeyMesh(); k.position.set(x,y,z); k.userData={type:'key_env',baseY:y}; scene.add(k); envKeys.push(k); objects.push(k);
+}
+
+/* -------------------------
+   Bewegung & Input
+   ------------------------- */
+let move = { forward:false, back:false, left:false, right:false, sprint:false };
+let velocity = new THREE.Vector3();
+let baseSpeed = 14.0;
+const sprintMultiplier = 2.0;
+
+function setupMovement(){
+  document.addEventListener('keydown', (e)=>{
+    if(e.code==='KeyW') move.forward=true;
+    if(e.code==='KeyS') move.back=true;
+    if(e.code==='KeyA') move.left=true;
+    if(e.code==='KeyD') move.right=true;
+    if(e.shiftKey) move.sprint=true;
+  });
+  document.addEventListener('keyup', (e)=>{
+    if(e.code==='KeyW') move.forward=false;
+    if(e.code==='KeyS') move.back=false;
+    if(e.code==='KeyA') move.left=false;
+    if(e.code==='KeyD') move.right=false;
+    if(!e.shiftKey) move.sprint=false;
+  });
+}
+
+/* -------------------------
+   Tastatursteuerung (global)
+   1–9 Auswahl, Shift+1–9 Sekundär, I Inventar, E Interaktion
+   ------------------------- */
+function onKeyDownGlobal(e){
+  if(/^[1-9]$/.test(e.key)){
+    const idx = Number(e.key) - 1;
+    const ped = getNearbyPedestal(2.2);
+    if(!e.shiftKey) { setPrimarySelection(idx, ped); return; }
+    else { toggleSecondarySelection(idx, ped); return; }
+  }
+  if(e.code && e.code.startsWith('Numpad')){
+    const num = Number(e.code.replace('Numpad',''));
+    if(num>=1 && num<=9){
+      const ped = getNearbyPedestal(2.2);
+      if(!e.shiftKey) { setPrimarySelection(num-1, ped); return; }
+      else { toggleSecondarySelection(num-1, ped); return; }
+    }
+  }
+
+  if(e.key==='i' || e.key==='I'){ toggleInventory(); return; }
+  if(e.key==='e' || e.key==='E'){
+    if (tryEnterNearbyHouse(2.6)) return;
+    if(state.inRoom) interactRoomObject(); else tryInteract();
+    return;
+  }
+  if(e.key==='f' || e.key==='F'){ if(state.inRoom) exitRoom(); return; }
+  if(e.key==='r' || e.key==='R'){ restartGame(); return; }
+}
+window.addEventListener('keydown', onKeyDownGlobal);
+
+/* -------------------------
+   Kontextsensitiver Auswahl-Helper
+   ------------------------- */
+function getNearbyPedestal(maxDistance = 2.2){
+  if(!controls) return null;
+  const p = controls.getObject().position;
+  for(const o of objects){
+    if(o.userData && o.userData.type === 'pedestal'){
+      const pos = new THREE.Vector3(); o.getWorldPosition(pos);
+      if(pos.distanceTo(p) <= maxDistance) return o;
+    }
+  }
+  return null;
+}
+function allowedIdsForPedestal(ped){
+  if(!ped) return null;
+  const house = ped.userData && ped.userData.house;
+  if(house === 'library') return ['crystal_blue','attunement'];
+  if(house === 'guard') return ['crystal_green','catalyst'];
+  return null;
+}
+function allowedNamesForPedestal(ped){
+  const ids = allowedIdsForPedestal(ped);
+  if(!ids) return null;
+  const map = { crystal_blue:'Blauer Kristall', attunement:'Attunement Shard', crystal_green:'Grüner Kristall', catalyst:'Catalyst Rod' };
+  return ids.map(id => map[id] || id);
+}
+
+/* -------------------------
+   Auswahl-Funktionen (kontextsensitiv)
+   ------------------------- */
+function setPrimarySelection(idx, nearbyPedestal = null){
+  if(!state.inventory || state.inventory.length===0){ showMessage('Inventar leer.'); return; }
+  if(idx < 0 || idx >= state.inventory.length){ showMessage('Keine Item‑Nummer dort.'); return; }
+  const item = state.inventory[idx];
+  const allowed = allowedIdsForPedestal(nearbyPedestal);
+  if(allowed && !allowed.includes(item.id)){
+    showMessage('Dieses Item kann hier nicht verwendet werden.');
+    return;
+  }
+  const sec = state.selectedInventoryIndices[1];
+  if(state.selectedInventoryIndices[0] === idx){
+    state.selectedInventoryIndices = [];
+  } else if(sec === idx){
+    state.selectedInventoryIndices = [idx];
+  } else {
+    const prevPrim = state.selectedInventoryIndices[0];
+    state.selectedInventoryIndices = [idx];
+    if(prevPrim !== undefined && prevPrim !== idx) state.selectedInventoryIndices.push(prevPrim);
+  }
+  renderInventory();
+  updateSelectedHUD();
+  showMessage('Ausgewählt: ' + item.name, 900);
+}
+
+function toggleSecondarySelection(idx, nearbyPedestal = null){
+  if(!state.inventory || state.inventory.length===0){ showMessage('Inventar leer.'); return; }
+  if(idx < 0 || idx >= state.inventory.length){ showMessage('Keine Item‑Nummer dort.'); return; }
+  const item = state.inventory[idx];
+  const allowed = allowedIdsForPedestal(nearbyPedestal);
+  if(allowed && !allowed.includes(item.id)){
+    showMessage('Dieses Item kann hier nicht verwendet werden.');
+    return;
+  }
+  const arr = state.selectedInventoryIndices.slice();
+  const pos = arr.indexOf(idx);
+  if(pos !== -1){ arr.splice(pos,1); }
+  else {
+    if(arr.length >= 2) arr[1] = idx;
+    else arr.push(idx);
+  }
+  state.selectedInventoryIndices = arr;
+  renderInventory();
+  updateSelectedHUD();
+}
+
+/* -------------------------
+   Interaktion & Spiel-Logik
+   ------------------------- */
+function tryInteract(){
+  raycaster.setFromCamera(new THREE.Vector2(0,0), camera);
+  const ints = raycaster.intersectObjects(scene.children, true);
+
+  if(ints.length === 0){
+    if (pickupNearbyFallback(1.6)) return;
+    pushLog('Nichts in Blickrichtung.');
+    return;
+  }
+
+  const hit = ints[0].object;
+  let target = hit;
+  while(target && !target.userData.type && !target.userData.isDoor && target.parent) target = target.parent;
+  const ud = target.userData || {};
+
+  if(ud.type === 'fountain' || target.name === 'fountain'){
+    pushLog('Du beugst dich über den Brunnen. Etwas glitzert am Grund.');
+    if(!hasItem('lantern') && !envKeys.some(k=>k.userData && k.userData.spawnedFrom==='fountain')){
+      addItem({ id:'lantern', name:'Alte Laterne', desc:'Erhellt dunkle Räume.' });
+      showMessage('Du findest eine alte Laterne im Brunnen.');
+      return;
+    }
+    if(!envKeys.some(k=>k.userData && k.userData.spawnedFrom==='fountain')){
+      if(Math.random() < 0.20 && !hasItem('catalyst')){
+        addItem({ id:'catalyst', name:'Catalyst Rod', desc:'Verstärkt Kristalle.' });
+        pushLog('Ein seltsamer Gegenstand glitt aus dem Brunnen: Catalyst Rod.');
+        showMessage('Du findest einen Catalyst Rod im Brunnen (selten).');
+      } else {
+        spawnKeyAt(1.2, 0.6, 0.8);
+        envKeys[envKeys.length-1].userData.spawnedFrom = 'fountain';
+        pushLog('Etwas glänzendes liegt am Brunnenrand.');
+      }
+      return;
+    }
+    pushLog('Nur kaltes Wasser.');
+    return;
+  }
+
+  if(ud.type === 'sign'){ showHintOnSign(target); return; }
+
+  if(ud.type === 'house' || target.userData.isDoor || (target.name && target.name.endsWith('_door'))){
+    const houseRoot = findHouseRoot(target);
+    if(houseRoot){
+      const id = houseRoot.userData && houseRoot.userData.id ? houseRoot.userData.id : null;
+      if(id === 'house1'){ enterHouseInterior('library', houseRoot); return; }
+      if(id === 'house2'){ enterHouseInterior('guard', houseRoot); return; }
+    }
+  }
+
+  if(ud.type === 'hazard'){ killPlayer('Der Boden gab nach.'); return; }
+  if(ud.type === 'crystal_env'){ pickUpCrystal(target); return; }
+  if(ud.type === 'key_env'){ pickUpKey(target); return; }
+  if(ud.type === 'altar'){ interactWithAltar(target); return; }
+  if(ud.type === 'pedestal'){ placeOnPedestal(target); return; }
+
+  pushLog('Interaktion nicht möglich.');
+}
+
+function findHouseRoot(obj){
+  let t = obj;
+  while(t && t.parent){
+    if(t.userData && t.userData.type === 'house') return t;
+    t = t.parent;
+  }
+  return null;
+}
+
+function pickupNearbyFallback(maxDistance = 1.6) {
+  const playerPos = controls.getObject().position.clone();
+  let nearest = null;
+  let nearestDist = Infinity;
+  for (const c of envCrystals) {
+    const d = playerPos.distanceTo(c.position);
+    if (d < maxDistance && d < nearestDist) { nearest = c; nearestDist = d; }
+  }
+  for (const k of envKeys) {
+    const d = playerPos.distanceTo(k.position);
+    if (d < maxDistance && d < nearestDist) { nearest = k; nearestDist = d; }
+  }
+  if (nearest) {
+    if (nearest.userData && nearest.userData.type === 'crystal_env') pickUpCrystal(nearest);
+    else if (nearest.userData && nearest.userData.type === 'key_env') pickUpKey(nearest);
+    return true;
+  }
+  return false;
+}
+
+/* -------------------------
+   Proximity house entry
+   ------------------------- */
+function tryEnterNearbyHouse(maxDistance = 2.6){
+  const playerPos = controls.getObject().position.clone();
+  for (const h of houses){
+    const door = h.getObjectByName ? h.getObjectByName(h.userData.id + '_door') : null;
+    const pos = new THREE.Vector3();
+    if (door) door.getWorldPosition(pos);
+    else h.getWorldPosition(pos);
+    const d = playerPos.distanceTo(pos);
+    if (d <= maxDistance){
+      const id = h.userData && h.userData.id ? h.userData.id : null;
+      if (id === 'house1'){ enterHouseInterior('library', h); return true; }
+      if (id === 'house2'){ enterHouseInterior('guard', h); return true; }
+    }
+  }
+  return false;
+}
+
+/* -------------------------
+   Sign Hinweis
+   ------------------------- */
+function showHintOnSign(signMesh){
+  if(!signMesh) return;
+  const hint = 'Hinweis: Kristalle müssen zuerst an den Pedestalen in den Häusern vorbereitet werden.';
+  const canvas = document.createElement('canvas'); canvas.width=360; canvas.height=96;
+  const ctx = canvas.getContext('2d'); ctx.fillStyle='rgba(12,10,18,0.95)'; ctx.fillRect(0,0,360,96);
+  ctx.fillStyle='#f0fbff'; ctx.font='16px serif'; ctx.textAlign='center'; wrapText(ctx,hint,180,54,320,18);
+  const tex = new THREE.CanvasTexture(canvas);
+  signMesh.material.map = tex; signMesh.material.needsUpdate=true;
+  showMessage('Der Hinweis erscheint auf dem Schild.');
+}
+
+/* -------------------------
+   Häuser / Pedestale / Items
+   ------------------------- */
+function enterHouseInterior(type, houseMesh){
+  if(!state.alive) return;
+  state.outsidePosition.copy(controls.getObject().position);
+  state.inRoom = type;
+  pushLog('Du betrittst das ' + (type==='library' ? 'Haus (Bibliothek).' : 'Wachhaus.'));
+  showMessage(type==='library' ? 'Bibliothek: Finde die Attunement Shard.' : 'Wachhaus: Öffne die Truhe für den Catalyst.');
+
+  const anchor = houseMesh.userData && houseMesh.userData.interiorAnchor ? houseMesh.userData.interiorAnchor.clone() : controls.getObject().position.clone();
+  const roomCenter = anchor.clone().add(new THREE.Vector3(0,0,-2));
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(8,8), new THREE.MeshStandardMaterial({ color:0x2b2626 })); floor.rotation.x=-Math.PI/2; floor.position.set(roomCenter.x,0.01,roomCenter.z); scene.add(floor);
+  const wallMat = new THREE.MeshStandardMaterial({ color:0x3a3330 });
+  const w1 = new THREE.Mesh(new THREE.BoxGeometry(8,3,0.2), wallMat); w1.position.set(roomCenter.x,1.5,roomCenter.z-4); scene.add(w1);
+  const w2 = w1.clone(); w2.position.set(roomCenter.x,1.5,roomCenter.z+4); scene.add(w2);
+  const w3 = new THREE.Mesh(new THREE.BoxGeometry(0.2,3,8), wallMat); w3.position.set(roomCenter.x-4,1.5,roomCenter.z); scene.add(w3);
+  const w4 = w3.clone(); w4.position.set(roomCenter.x+4,1.5,roomCenter.z); scene.add(w4);
+  state.roomObjects = [floor,w1,w2,w3,w4];
+
+  if(type==='library'){
+    const table = new THREE.Mesh(new THREE.BoxGeometry(2.8,0.2,1.2), new THREE.MeshStandardMaterial({ color:0x2f2a28 })); table.position.set(roomCenter.x,0.9,roomCenter.z-1.2); scene.add(table); state.roomObjects.push(table);
+    const titles = [{title:'Licht der Tiefe',good:true,clue:'Erwähne das Wasser'},{title:'Schattenchronik',good:false,clue:'Schwarze Tinte'},{title:'Sagen des Wächters',good:false,clue:'Wächtername'}];
+    for(let i=0;i<3;i++){ const book = new THREE.Mesh(new THREE.BoxGeometry(0.6,0.08,1.0), new THREE.MeshStandardMaterial({ color:i===0?0x9fd6e8:0x6b6b6b })); book.position.set(roomCenter.x + (i-1)*0.8,0.98,roomCenter.z-1.2); book.userData={type:'book',good:titles[i].good,title:titles[i].title,clue:titles[i].clue}; scene.add(book); state.roomObjects.push(book); objects.push(book); }
+    const ped = makePedestal(roomCenter.x - 2.2, 0.9, roomCenter.z + 1.6, 'library'); scene.add(ped); state.roomObjects.push(ped); objects.push(ped);
+  } else {
+    const chest = new THREE.Mesh(new THREE.BoxGeometry(0.9,0.6,0.7), new THREE.MeshStandardMaterial({ color:0x3b2f2a })); chest.position.set(roomCenter.x,0.9,roomCenter.z-1.2); chest.userData={type:'chest',locked:true}; scene.add(chest); state.roomObjects.push(chest); objects.push(chest);
+    const ped = makePedestal(roomCenter.x + 2.2, 0.9, roomCenter.z + 1.6, 'guard'); scene.add(ped); state.roomObjects.push(ped); objects.push(ped);
+    const deco = createCrystalMesh(0x88d6ff); deco.scale.setScalar(0.6); deco.position.set(roomCenter.x+1.6,0.6,roomCenter.z-1.6); scene.add(deco); state.roomObjects.push(deco);
+  }
+
+  controls.getObject().position.set(roomCenter.x, state.playerStart.y, roomCenter.z + 1.6);
+  camera.position.copy(controls.getObject().position);
+}
+
+function makePedestal(x,y,z,houseId){
+  const g = new THREE.Group();
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(0.28,0.28,0.18,16), new THREE.MeshStandardMaterial({ color:0x222222 })); base.position.y = y; g.add(base);
+  const plate = new THREE.Mesh(new THREE.CircleGeometry(0.22,16), new THREE.MeshStandardMaterial({ color:0x1f6b7a })); plate.rotation.x = -Math.PI/2; plate.position.y = y + 0.12; g.add(plate);
+  g.position.set(x,0,z);
+  g.userData = { type:'pedestal', house:houseId, filled:false, placedItem:null, baseY: y + 0.12 };
+  return g;
+}
+
+function exitRoom(){
+  if(!state.inRoom) return;
+  if(state.roomObjects){ for(const o of state.roomObjects){ scene.remove(o); const oi = objects.indexOf(o); if(oi>=0) objects.splice(oi,1); } state.roomObjects=null; }
+  controls.getObject().position.copy(state.outsidePosition); camera.position.copy(controls.getObject().position); state.inRoom=null;
+  pushLog('Du verlässt das Haus und kehrst auf den Dorfplatz zurück.');
+  showMessage('Du bist wieder draußen.');
+}
+
+/* -------------------------
+   Interaktionen im Raum
+   ------------------------- */
+function interactRoomObject(){
+  raycaster.setFromCamera(new THREE.Vector2(0,0), camera);
+  const ints = raycaster.intersectObjects(scene.children, true);
+  if(ints.length===0){
+    if (pickupNearbyFallback(1.6)) return;
+    pushLog('Kein Objekt anvisiert.');
+    return;
+  }
+  let hit = ints[0].object;
+  while(hit && !hit.userData.type && hit.parent) hit = hit.parent;
+  const ud = hit.userData || {};
+
+  if(ud.type==='book'){
+    pushLog('Du öffnest "'+ud.title+'".'); showMessage('Text: "'+ud.clue+'"',2200);
+    if(ud.good && !state.solved.library){
+      addItem({id:'attunement',name:'Attunement Shard',desc:'Ein Splitter, der Kristalle anstimmen kann.'});
+      state.solved.library=true; scene.remove(hit); const idx = objects.indexOf(hit); if(idx>=0) objects.splice(idx,1);
+    } else killPlayer('Das Buch war vergiftet. Du fühlst, wie die Welt schwankt.');
+    return;
+  }
+
+  if(ud.type==='chest'){
+    if(ud.locked){
+      if(hasItem('rustykey')){
+        ud.locked=false;
+        pushLog('Du öffnest die Truhe. Darin: Catalyst Rod.');
+        addItem({id:'catalyst',name:'Catalyst Rod',desc:'Verstärkt Kristalle.'});
+        state.solved.guard=true;
+      } else pushLog('Die Truhe ist verschlossen. Du brauchst einen Schlüssel.');
+    } else pushLog('Die Truhe ist leer.');
+    return;
+  }
+
+  if(ud.type==='pedestal'){ placeOnPedestal(hit); return; }
+  if(ud.type==='crystal_env'){ pickUpCrystal(hit); return; }
+  if(ud.type==='key_env'){ pickUpKey(hit); return; }
+
+  pushLog('Nichts zu tun.');
+}
+
+/* -------------------------
+   Platzieren auf Pedestal (verlangt Kombination)
+   ------------------------- */
+function placeOnPedestal(pedMesh){
+  const ped = pedMesh.userData ? pedMesh : null;
+  if(!ped || ped.userData.type!=='pedestal') return;
+
+  const selIds = (state.selectedInventoryIndices || []).map(i => state.inventory[i] ? state.inventory[i].id : null).filter(Boolean);
+
+  if(selIds.length === 0){ pushLog('Wähle zuerst die passenden Items (1–9 / Shift+1–9).'); return; }
+
+  if(ped.userData.house==='library'){
+    const need = ['crystal_blue','attunement'];
+    if(need.every(n => selIds.includes(n))){
+      removeItemByPredicate(it => it.id === 'crystal_blue');
+      removeItemByPredicate(it => it.id === 'attunement');
+      ped.userData.filled=true; ped.userData.placedItem='crystal_blue'; state.pedestals.library=true;
+      pushLog('Blauer Kristall auf Bibliotheks‑Pedestal platziert und abgestimmt.');
+      showMessage('Bibliothek‑Pedestal aktiviert.');
+      const glow = createCrystalMesh(0x4fd6ff); glow.scale.setScalar(0.6); glow.position.set(0,ped.userData.baseY,0); pedMesh.add(glow);
+      state.selectedInventoryIndices = [];
+      renderInventory(); updateSelectedHUD();
+      return;
+    } else {
+      pushLog('Benötigt: Blauer Kristall + Attunement Shard (wähle beide).');
+      return;
+    }
+  }
+
+  if(ped.userData.house==='guard'){
+    const need = ['crystal_green','catalyst'];
+    if(need.every(n => selIds.includes(n))){
+      removeItemByPredicate(it => it.id === 'crystal_green');
+      removeItemByPredicate(it => it.id === 'catalyst');
+      ped.userData.filled=true; ped.userData.placedItem='crystal_green'; state.pedestals.guard=true;
+      pushLog('Grüner Kristall auf Wachhaus‑Pedestal platziert und aktiviert.');
+      showMessage('Wachhaus‑Pedestal aktiviert.');
+      const glow = createCrystalMesh(0x6bff9a); glow.scale.setScalar(0.6); glow.position.set(0,ped.userData.baseY,0); pedMesh.add(glow);
+      state.selectedInventoryIndices = [];
+      renderInventory(); updateSelectedHUD();
+      return;
+    } else {
+      pushLog('Benötigt: Grüner Kristall + Catalyst Rod (wähle beide).');
+      return;
+    }
+  }
+
+  pushLog('Dieses Pedestal akzeptiert diese Kombination nicht.');
+}
+
+/* -------------------------
+   Altar (final)
+   ------------------------- */
+function interactWithAltar(altarMesh){
+  if(state.pedestals.library && state.pedestals.guard){
+    if(!altarMesh.userData.portalCreated){
+      createPortalAt(altarMesh.position.x, altarMesh.position.y + 1.0, altarMesh.position.z);
+      altarMesh.userData.portalCreated=true;
+      pushLog('Die Pedestale verbinden sich. Ein Portal öffnet sich über dem Altar.');
+      showMessage('Portal geöffnet. Trete hindurch, um das Geheimnis zu beenden.');
+    } else pushLog('Portal bereits aktiv.');
+  } else {
+    pushLog('Der Altar reagiert nicht. Beide Pedestale müssen aktiviert werden.');
+    showMessage('Tipp: Aktiviere die Pedestale in beiden Häusern.');
+  }
+}
+function createPortalAt(x,y,z){
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(1.6,0.25,16,64), new THREE.MeshStandardMaterial({ color:0x88e6ff, emissive:0x66d6ff, emissiveIntensity:0.9, transparent:true, opacity:0.95 }));
+  ring.position.set(x,y,z); ring.rotation.x=Math.PI/2; ring.userData={type:'portal'}; scene.add(ring); objects.push(ring);
+}
+
+/* -------------------------
+   Aufheben / Inventar
+   ------------------------- */
+function pickUpCrystal(mesh){
+  let target = mesh;
+  if(!envCrystals.includes(target)){
+    for(const c of envCrystals){ if(c===mesh || c.children.includes(mesh) || mesh.parent===c){ target=c; break; } }
+  }
+  if(target && target.userData && target.userData.type==='crystal_env'){
+    scene.remove(target);
+    const i = envCrystals.indexOf(target); if(i>=0) envCrystals.splice(i,1);
+    const oi = objects.indexOf(target); if(oi>=0) objects.splice(oi,1);
+    const color = target.userData.color || 'blue';
+    addItem({ id: color==='green' ? 'crystal_green' : 'crystal_blue', name: color==='green' ? 'Grüner Kristall' : 'Blauer Kristall', desc: color==='green' ? 'Ein lebhaft grünes Kristallfragment.' : 'Ein blaues Fragment fremder Energie.' });
+    pushLog('Du sammelst den ' + (color==='green' ? 'grünen' : 'blauen') + ' Kristall ein.');
+  } else pushLog('Kann nicht aufgehoben werden.');
+}
+function pickUpKey(mesh){
+  let target = mesh;
+  if(!envKeys.includes(target)){
+    for(const k of envKeys){ if(k===mesh || k.children.includes(mesh) || mesh.parent===k){ target=k; break; } }
+  }
+  if(target && target.userData && target.userData.type==='key_env'){
+    scene.remove(target);
+    const i = envKeys.indexOf(target); if(i>=0) envKeys.splice(i,1);
+    const oi = objects.indexOf(target); if(oi>=0) objects.splice(oi,1);
+    addItem({ id:'rustykey', name:'Rostiger Schlüssel', desc:'Passt vielleicht zu einer alten Truhe.' });
+    pushLog('Du sammelst den rostigen Schlüssel ein.');
+  } else pushLog('Kann nicht aufgehoben werden.');
+}
+
+/* -------------------------
+   Inventar UI & Auswahl (kontextsensitiv)
+   ------------------------- */
+function addItem(item){
+  if(!item || !item.id) return;
+  state.inventory.push(item);
+  renderInventory();
+  updateSelectedHUD();
+  pushLog('Gegenstand erhalten: ' + (item.name || item.id));
+  console.log('addItem:', item, 'inventory now:', state.inventory);
+}
+function hasItem(id){ return state.inventory.some(i=>i.id===id); }
+function removeItemByPredicate(pred){
+  for(let i=0;i<state.inventory.length;i++){ if(pred(state.inventory[i])){ state.inventory.splice(i,1); renderInventory(); updateSelectedHUD(); return true; } }
+  return false;
+}
+
+function toggleInventory(){
+  if(invEl.style.display==='block'){
+    invEl.style.display='none';
+    try{ controls.lock(); } catch(e){}
+  } else {
+    invEl.style.display='block';
+    invEl.style.pointerEvents='auto';
+    try{ controls.unlock(); } catch(e){}
+  }
+  renderInventory();
+  updateSelectedHUD();
+}
+
+function renderInventory(){
+  const nearbyPed = getNearbyPedestal(2.2);
+  const allowedIds = allowedIdsForPedestal(nearbyPed); // null or array
+  const allowedNames = allowedNamesForPedestal(nearbyPed);
+  allowedNamesEl.textContent = allowedNames ? allowedNames.join(' · ') : '—';
+
+  if(!state.inventory || state.inventory.length===0){ invEl.innerHTML='Keine Gegenstände.'; state.selectedInventoryIndices=[]; updateSelectedHUD(); return; }
+  invEl.innerHTML = state.inventory.map((it,i)=>{
+    const selected = state.selectedInventoryIndices.indexOf(i);
+    let style = 'outline:none;';
+    if(selected === 0) style = 'outline:2px solid rgba(143,188,212,0.9);';
+    if(selected === 1) style = 'outline:2px dashed rgba(180,220,150,0.9);';
+    const disabled = (allowedIds && !allowedIds.includes(it.id)) ? ' disabled' : '';
+    return `<div class="item${disabled}" data-idx="${i}" style="${style}"><strong>${i+1}. ${it.name}</strong> — ${it.desc}</div>`;
+  }).join('');
+  if(state.selectedInventoryIndices.length > 2) state.selectedInventoryIndices = state.selectedInventoryIndices.slice(0,2);
+  updateSelectedHUD();
+}
+
+function updateSelectedHUD(){
+  if(!state.selectedInventoryIndices || state.selectedInventoryIndices.length===0){
+    selectedHUD.style.display='none'; return;
+  }
+  const parts = state.selectedInventoryIndices.map((idx, i) => {
+    const it = state.inventory[idx];
+    if(!it) return null;
+    return (i===0 ? 'Primär: ' : 'Sekundär: ') + it.name;
+  }).filter(Boolean);
+  selectedHUD.style.display='inline-block';
+  selectedHUD.textContent = 'Ausgewählt: ' + parts.join(' · ');
+}
+
+/* -------------------------
+   Tod / Neustart
+   ------------------------- */
+function killPlayer(reason){
+  if(!state.alive) return;
+  state.alive=false;
+  state.inventory=[]; state.selectedInventoryIndices=[]; renderInventory(); updateSelectedHUD();
+  logEl.innerHTML=''; pushLog('Tod: ' + reason);
+  showMessage('Du bist gestorben. ' + reason + ' Das Spiel beginnt von vorn.',3000);
+  setTimeout(()=> restartGame(),1800);
+}
+function restartGame(){
+  state.inventory=[]; state.selectedInventoryIndices=[]; state.alive=true; state.inRoom=null;
+  state.solved={library:false,guard:false}; state.pedestals={library:false,guard:false};
+  controls.getObject().position.copy(state.playerStart); camera.position.copy(controls.getObject().position);
+  for(const c of envCrystals) scene.remove(c); envCrystals=[];
+  for(const k of envKeys) scene.remove(k); envKeys=[];
+  const portals = objects.filter(o=>o.userData && o.userData.type==='portal'); for(const p of portals){ scene.remove(p); const idx=objects.indexOf(p); if(idx>=0) objects.splice(idx,1); }
+  spawnEnvCrystal(4,0.6,-4,'blue'); spawnEnvCrystal(-8,0.6,6,'green'); spawnEnvCrystal(10,0.6,10,'blue'); spawnEnvCrystal(-12,0.6,-8,'green');
+  if(state.roomObjects){ for(const o of state.roomObjects) scene.remove(o); state.roomObjects=null; }
+  renderInventory(); logEl.innerHTML='Du erwachst erneut auf dem Dorfplatz.';
+}
+
+/* -------------------------
+   Tür‑Blockade & Animation
+   ------------------------- */
+function isInDoorZone(maxDistance = 1.0) {
+  const p = controls.getObject().position;
+  for (const h of houses) {
+    const door = h.getObjectByName ? h.getObjectByName(h.userData.id + '_door') : null;
+    const pos = new THREE.Vector3();
+    if (door) door.getWorldPosition(pos);
+    else h.getWorldPosition(pos);
+    const dXZ = Math.hypot(p.x - pos.x, p.z - pos.z);
+    if (dXZ <= maxDistance) return true;
+  }
+  return false;
+}
+
+function animate(){
+  requestAnimationFrame(animate);
+  const delta = Math.min(0.06, clock.getDelta());
+
+  for(let i=0;i<envCrystals.length;i++){ const c=envCrystals[i]; c.rotation.y += 0.6*delta; const bob=Math.sin((performance.now()*0.001)+i)*0.02; if(c.userData && c.userData.baseY!==undefined) c.position.y = c.userData.baseY + bob; }
+  for(let i=0;i<envKeys.length;i++){ const k=envKeys[i]; k.rotation.y += 0.8*delta; const bob=Math.sin((performance.now()*0.001)+i*1.3)*0.02; if(k.userData && k.userData.baseY!==undefined) k.position.y = k.userData.baseY + bob; }
+
+  if(controls.isLocked===true && state.alive){
+    prevPlayerPos.copy(controls.getObject().position);
+
+    velocity.x -= velocity.x * 6.0 * delta; velocity.z -= velocity.z * 6.0 * delta;
+    const dir = new THREE.Vector3();
+    if(move.forward) dir.z -= 1; if(move.back) dir.z += 1; if(move.left) dir.x -= 1; if(move.right) dir.x += 1;
+    if(dir.lengthSq()>0){ dir.normalize(); dir.applyQuaternion(camera.quaternion); const curSpeed = baseSpeed * (move.sprint ? sprintMultiplier : 1.0); velocity.x += dir.x * curSpeed * delta; velocity.z += dir.z * curSpeed * delta; }
+
+    controls.getObject().position.x += velocity.x * delta;
+    controls.getObject().position.z += velocity.z * delta;
+    controls.getObject().position.y = state.playerStart.y;
+    camera.position.copy(controls.getObject().position);
+
+    if (!state.inRoom) {
+      if (isInDoorZone(1.0)) {
+        controls.getObject().position.copy(prevPlayerPos);
+        camera.position.copy(controls.getObject().position);
+      }
+    }
+
+    const pitPos = new THREE.Vector3(-4,0,12); if(controls.getObject().position.distanceTo(pitPos) < 3.0) killPlayer('Der Boden gab nach.');
+
+    const portal = objects.find(o=>o.userData && o.userData.type==='portal');
+    if(portal){
+      const dist = controls.getObject().position.distanceTo(portal.position);
+      if(dist < 1.6){
+        showMessage('Du trittst durch das Portal. Das Geheimnis von Hurlum offenbart sich...',4000);
+        pushLog('Du hast das Geheimnis gelüftet. Spielende.');
+        state.alive=false;
+      }
+    }
+  }
+
+  renderer.render(scene,camera);
+}
+
+/* -------------------------
+   Hilfsfunktionen
+   ------------------------- */
+function pushLog(text){ logEl.innerHTML = text + '<br>' + logEl.innerHTML; }
+function showMessage(text,ms=2200){ msgEl.style.display='block'; msgEl.textContent=text; setTimeout(()=>{ msgEl.style.opacity='0'; setTimeout(()=>{ msgEl.style.display='none'; msgEl.style.opacity='1'; },400); }, ms); }
+function onWindowResize(){ camera.aspect = window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); }
+
+</script>
+</body>
+</html>
