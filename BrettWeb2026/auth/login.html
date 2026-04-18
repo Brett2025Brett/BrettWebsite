@@ -162,43 +162,74 @@ a:hover {
 </div>
 
 <script type="module">
-  import { login, getSession } from "./auth.js";
+import { login, getSession } from "./auth.js";
 
-  const email = document.getElementById("email");
-  const password = document.getElementById("password");
-  const msg = document.getElementById("msg");
-  const loginBtn = document.getElementById("loginBtn");
-  const emailField = document.getElementById("email");
-  const passwordField = document.getElementById("password");
-  const spinner = document.getElementById("spinner");
+const email = document.getElementById("email");
+const password = document.getElementById("password");
+const msg = document.getElementById("msg");
+const loginBtn = document.getElementById("loginBtn");
+const emailField = document.getElementById("email");
+const passwordField = document.getElementById("password");
+const spinner = document.getElementById("spinner");
 
-  async function loadLoginRegisterData() {
-    msg.textContent = "";
+async function loadLoginRegisterData() {
+  msg.textContent = "";
 
-    emailField.style.display = "none";
-    passwordField.style.display = "none";
-    loginBtn.style.display = "none";
-    spinner.style.display = "block";
+  emailField.style.display = "none";
+  passwordField.style.display = "none";
+  loginBtn.style.display = "none";
+  spinner.style.display = "block";
 
-    try {
-      await login(emailField.value, passwordField.value);
-      msg.textContent = "Login erfolgreich. Weiterleitung...";
-      setTimeout(() => window.location.href = "https://brett2025brett.github.io/BrettWebsite/BrettWeb2026/mainpage.html", 1000);
-    } catch (err) {
-      msg.textContent = err.message;
-      emailField.style.display = "block";
-      passwordField.style.display = "block";
-      loginBtn.style.display = "block";
-      spinner.style.display = "none";
+  try {
+    await login(emailField.value, passwordField.value);
+
+    msg.textContent = "Login erfolgreich. Weiterleitung...";
+
+    // 🔥 NUR HIER GEÄNDERT
+    const pending = localStorage.getItem("pendingDownload");
+
+    if (pending) {
+      localStorage.removeItem("pendingDownload");
+
+      setTimeout(() => {
+        window.location.href =
+          pending === "setup"
+            ? "https://github.com/brett2025brett/BrettWebsite/releases/download/Setup/Notizbrett.exe"
+            : "https://github.com/brett2025brett/BrettWebsite/releases/download/Portable/Notizbrett.zip";
+
+        setTimeout(() => {
+          window.location.href =
+            "https://brett2025brett.github.io/BrettWebsite/BrettWeb2026/mainpage.html";
+        }, 1500);
+
+      }, 500);
+
+    } else {
+      setTimeout(() => {
+        window.location.href =
+          "https://brett2025brett.github.io/BrettWebsite/BrettWeb2026/mainpage.html";
+      }, 1000);
     }
+
+  } catch (err) {
+    msg.textContent = err.message;
+
+    emailField.style.display = "block";
+    passwordField.style.display = "block";
+    loginBtn.style.display = "block";
+    spinner.style.display = "none";
   }
+}
 
-  loginBtn.addEventListener("click", loadLoginRegisterData);
+loginBtn.addEventListener("click", loadLoginRegisterData);
 
-  (async () => {
-    const session = await getSession();
-    if (session) window.location.href = "https://brett2025brett.github.io/BrettWebsite/BrettWeb2026/mainpage.html";
-  })();
+(async () => {
+  const session = await getSession();
+  if (session) {
+    window.location.href =
+      "https://brett2025brett.github.io/BrettWebsite/BrettWeb2026/mainpage.html";
+  }
+})();
 </script>
 
 </body>
