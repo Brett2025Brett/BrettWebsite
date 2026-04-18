@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -26,6 +27,7 @@
   transform:scale(1.05);
   color:white;
 }
+
 </style>
 </head>
 
@@ -42,9 +44,9 @@
     <div class="nav">
       <a href="mainpage.html"><i class="fas fa-home"></i> Willkommen</a>
       <a href="downloadcenter_new.html"><i class="fas fa-download"></i> Downloads</a>
-      <a href="Online-tools.html"><i class="fas fa-tools"></i> Onlinetools</a>
+<a href="Online-tools.html"><i class="fas fa-tools"></i> Onlinetools</a>
       <a href="Lizenz.html"><i class="fas fa-file-contract"></i> Lizenz</a>
-      <a href="brett-spiele.html"><i class="fa fa-gamepad"></i> Spiele</a>
+         <a href="brett-spiele.html"><i class="fa fa-gamepad"></i> Spiele</a>
     </div>
   </div>
   <div class="logout">
@@ -53,138 +55,67 @@
 </div>
 
 <div class="main">
+
 <h1 style="margin-bottom:30px;">Notizbrett: Download und Infos</h1>
 
 <div class="grid" id="grid">
 
-<!-- INFO -->
 <div class="card" draggable="true" data-id="1">
-Notizbrett ist eine Anwendung, mit der Sie sehr einfach Notizen erstellen können!  
-Wir arbeiten aktuell an einer Neuprogrammierung in C#.  
-<b>Hinweis: Downloads laufen über GitHub Releases.</b>
+Notizbrett ist eine Anwendung , mit der sie sehr einfach Notizen erstellen können , wann sie wollen ! Wir haben das Programm vor ungefähr einen Jahr gestartet. Es bekam sehr lange keine Uptates mehr und jetzt arbeiten wir gerade an einer kompletten Neuprogrammierung in C# (WinForms) Es unterstützt weder Cloud-Syncronisierung noch irgendwas in diese Richtung, weshalb wir ihnen empfehlen, OneNote von Microsoft zu nutzen. Weil wir nicht viel Zeit hatten, um es zu erstellen, hat es außerdem viele Bugs. 
+<b>SEHR WICHTIG: Die Dateien werden über Github Pages gehostet (releases-section) Bitte habt verständis damit </b>
 </div>
 
-<!-- DOWNLOAD -->
 <div class="card" draggable="true" data-id="2">
-
-<button class="download-button"
-onclick="window.open('https://brett2025brett.github.io/BrettWebsite/Notizbrett.html')">
-Online ausprobieren
-</button>
-
-<button class="download-button"
-onclick="checkAuthAndDownload('portable')">
-Portable herunterladen (ZIP)
-</button>
-
-<button class="download-button"
-onclick="checkAuthAndDownload('setup')">
-Setup herunterladen (.exe)
-</button>
-
-</div>
-
-<!-- CREDITS -->
+<button class="download-button" onclick="window.open('https://brett2025brett.github.io/BrettWebsite/Notizbrett.html')">Online ausprobieren</button>
+<button class="download-button" onclick="downloadNotizbrett()">Portable herunterladen (ZIP)</button>
 <div class="card" draggable="true" data-id="3">
-<p>Programm erstellt von Simon (2024), hochgeladen (2025), Text: Jonas</p>
+<p>Programm erstellt von Simon (2024), hochgeladen von Simon (2025), Text geschrieben von Jonas (2025)
+</div>
+<br>
+
+<div class="card" draggable="true" data-id="4">
+<img src="screenshots/Notizbrett-Screenshot.png" height="200" length="290">
 </div>
 
-<!-- SCREENSHOT -->
-<div class="card" draggable="true" data-id="4">
-<img src="screenshots/Notizbrett-Screenshot.png" height="200">
+
+
+
+
 </div>
+
 
 </div>
 </div>
 
 <script type="module">
-import { setupAuthUI } from "./auth.js";
-setupAuthUI();
+  import { setupAuthUI } from "./auth.js";
+  setupAuthUI();
 </script>
+
 
 <script src="particles.js"></script>
-
 <script>
-// ----------------------
-// LOGIN STATUS
-// ----------------------
-function isLoggedIn() {
-  return localStorage.getItem("userLoggedIn") === "true";
+  function downloadNotizbrett() {
+    const url = "https://github.com/brett2025brett/BrettWebsite/releases/download/Portable/Notizbrett.zip";
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "";   // Browser versucht Download zu erzwingen
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
 }
+   function downloadNotizbrettsetup() {
+    const url = "https://github.com/brett2025brett/BrettWebsite/releases/download/Setup/Notizbrett.exe";
 
-// ----------------------
-// DOWNLOAD FLOW
-// ----------------------
-function checkAuthAndDownload(type) {
-  if (!isLoggedIn()) {
-
-    // merken was gewollt war
-    localStorage.setItem("pendingDownload", type);
-
-    // weiterleiten zum Login
-    window.location.href = "login.html";
-    return;
-  }
-
-  startDownload(type);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "";   // Browser versucht Download zu erzwingen
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
 }
-
-function startDownload(type) {
-  if (type === "portable") {
-    downloadNotizbrett();
-  } else if (type === "setup") {
-    downloadNotizbrettsetup();
-  }
-}
-
-// ----------------------
-// AUTO DOWNLOAD NACH LOGIN
-// ----------------------
-window.addEventListener("load", () => {
-  if (isLoggedIn()) {
-    const pending = localStorage.getItem("pendingDownload");
-
-    if (pending) {
-      localStorage.removeItem("pendingDownload");
-      startDownload(pending);
-    }
-  }
-});
-
-// ----------------------
-// DOWNLOAD FUNKTIONEN
-// ----------------------
-function downloadNotizbrett() {
-  const url = "https://github.com/brett2025brett/BrettWebsite/releases/download/Portable/Notizbrett.zip";
-
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "";
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-}
-
-function downloadNotizbrettsetup() {
-  const url = "https://github.com/brett2025brett/BrettWebsite/releases/download/Setup/Notizbrett.exe";
-
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "";
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-}
-
-// ----------------------
-// LOGOUT
-// ----------------------
-document.getElementById("logoutBtn").addEventListener("click", () => {
-  localStorage.removeItem("userLoggedIn");
-  alert("Ausgeloggt");
-  window.location.href = "login.html";
-});
+  
 </script>
-
 </body>
 </html>
