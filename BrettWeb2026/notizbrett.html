@@ -2,31 +2,188 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>Login</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BRETT Notizbrett</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<link rel="stylesheet" href="style.css">
+<style>
+.download-button{
+  padding:15px 30px;
+  background:#00f2ff;
+  color:black;
+  font-size:1rem;
+  border:none;
+  border-radius:50px;
+  cursor:pointer;
+  box-shadow:0 4px 10px rgba(0,242,255,0.3);
+  transition:all 0.3s ease;
+}
+.download-button:hover{
+  background:#00aaff;
+  transform:scale(1.05);
+  color:white;
+}
+</style>
 </head>
 
 <body>
+<canvas id="particles"></canvas>
 
-<h2>Login</h2>
+<div class="hamburger" onclick="toggleMenu()">
+<i class="fas fa-bars"></i>
+</div>
 
-<button onclick="login()">Einloggen</button>
+<div class="sidebar" id="sidebar">
+  <div>
+    <div class="logo">BRETT</div>
+    <div class="nav">
+      <a href="mainpage.html"><i class="fas fa-home"></i> Willkommen</a>
+      <a href="downloadcenter_new.html"><i class="fas fa-download"></i> Downloads</a>
+      <a href="Online-tools.html"><i class="fas fa-tools"></i> Onlinetools</a>
+      <a href="Lizenz.html"><i class="fas fa-file-contract"></i> Lizenz</a>
+      <a href="brett-spiele.html"><i class="fa fa-gamepad"></i> Spiele</a>
+    </div>
+  </div>
+  <div class="logout">
+    <button id="logoutBtn">Logout</button>
+  </div>
+</div>
+
+<div class="main">
+<h1 style="margin-bottom:30px;">Notizbrett: Download und Infos</h1>
+
+<div class="grid" id="grid">
+
+<!-- INFO -->
+<div class="card" draggable="true" data-id="1">
+Notizbrett ist eine Anwendung, mit der Sie sehr einfach Notizen erstellen können!  
+Wir arbeiten aktuell an einer Neuprogrammierung in C#.  
+<b>Hinweis: Downloads laufen über GitHub Releases.</b>
+</div>
+
+<!-- DOWNLOAD -->
+<div class="card" draggable="true" data-id="2">
+
+<button class="download-button"
+onclick="window.open('https://brett2025brett.github.io/BrettWebsite/Notizbrett.html')">
+Online ausprobieren
+</button>
+
+<button class="download-button"
+onclick="checkAuthAndDownload('portable')">
+Portable herunterladen (ZIP)
+</button>
+
+<button class="download-button"
+onclick="checkAuthAndDownload('setup')">
+Setup herunterladen (.exe)
+</button>
+
+</div>
+
+<!-- CREDITS -->
+<div class="card" draggable="true" data-id="3">
+<p>Programm erstellt von Simon (2024), hochgeladen (2025), Text: Jonas</p>
+</div>
+
+<!-- SCREENSHOT -->
+<div class="card" draggable="true" data-id="4">
+<img src="screenshots/Notizbrett-Screenshot.png" height="200">
+</div>
+
+</div>
+</div>
+
+<script type="module">
+import { setupAuthUI } from "./auth.js";
+setupAuthUI();
+</script>
+
+<script src="particles.js"></script>
 
 <script>
-function login() {
+// ----------------------
+// LOGIN STATUS
+// ----------------------
+function isLoggedIn() {
+  return localStorage.getItem("userLoggedIn") === "true";
+}
 
-  // Login speichern
-  localStorage.setItem("userLoggedIn", "true");
+// ----------------------
+// DOWNLOAD FLOW
+// ----------------------
+function checkAuthAndDownload(type) {
+  if (!isLoggedIn()) {
 
-  // 🔥 WICHTIG: Redirect korrekt behandeln
-  const redirect = localStorage.getItem("redirectAfterLogin");
+    // merken was gewollt war
+    localStorage.setItem("pendingDownload", type);
 
-  if (redirect) {
-    localStorage.removeItem("redirectAfterLogin");
-    window.location.href = redirect;
-  } else {
-    window.location.href = "mainpage.html";
+    // weiterleiten zum Login
+    window.location.href = "login.html";
+    return;
+  }
+
+  startDownload(type);
+}
+
+function startDownload(type) {
+  if (type === "portable") {
+    downloadNotizbrett();
+  } else if (type === "setup") {
+    downloadNotizbrettsetup();
   }
 }
+
+// ----------------------
+// AUTO DOWNLOAD NACH LOGIN
+// ----------------------
+window.addEventListener("load", () => {
+  if (isLoggedIn()) {
+    const pending = localStorage.getItem("pendingDownload");
+
+    if (pending) {
+      localStorage.removeItem("pendingDownload");
+      startDownload(pending);
+    }
+  }
+});
+
+// ----------------------
+// DOWNLOAD FUNKTIONEN
+// ----------------------
+function downloadNotizbrett() {
+  const url = "https://github.com/brett2025brett/BrettWebsite/releases/download/Portable/Notizbrett.zip";
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+function downloadNotizbrettsetup() {
+  const url = "https://github.com/brett2025brett/BrettWebsite/releases/download/Setup/Notizbrett.exe";
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+// ----------------------
+// LOGOUT
+// ----------------------
+document.getElementById("logoutBtn").addEventListener("click", () => {
+  localStorage.removeItem("userLoggedIn");
+  alert("Ausgeloggt");
+  window.location.href = "login.html";
+});
 </script>
 
 </body>
