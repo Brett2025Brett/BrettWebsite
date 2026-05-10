@@ -1,0 +1,589 @@
+<!doctype html>
+<html lang="de" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brett Mensch Ärgere Dich Nicht</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Fredoka', sans-serif; }
+    .dice-rolling { animation: diceRoll 0.5s ease-in-out; }
+    @keyframes diceRoll { 
+      0%,100% { transform: rotate(0deg) scale(1); }
+      25% { transform: rotate(90deg) scale(1.2); }
+      50% { transform: rotate(180deg) scale(0.9); }
+      75% { transform: rotate(270deg) scale(1.1); }
+    }
+    .piece-move { animation: pieceMove 0.3s ease-out; }
+    @keyframes pieceMove {
+      0% { transform: scale(1.4); }
+      100% { transform: scale(1); }
+    }
+    .pulse-highlight { animation: pulseH 1s infinite; }
+    @keyframes pulseH {
+      0%,100% { box-shadow: 0 0 0 0 rgba(255,255,0,0.7); }
+      50% { box-shadow: 0 0 0 6px rgba(255,255,0,0); }
+    }
+    .board-cell {
+      width: 32px; height: 32px;
+      border: 1.5px solid #555;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+      transition: all 0.2s;
+    }
+    .piece {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      border: 2px solid rgba(0,0,0,0.3);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .piece:hover { transform: scale(1.2); }
+    .toast {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      padding: 12px 24px; border-radius: 12px; color: white;
+      font-weight: 600; z-index: 100; opacity: 0; transition: opacity 0.3s;
+    }
+    .toast.show { opacity: 1; }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div id="app" class="h-full w-full overflow-auto bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 flex flex-col items-center p-4">
+   <!-- Setup Screen -->
+   <div id="setup-screen" class="flex flex-col items-center justify-center gap-6 max-w-md w-full mt-8">
+    <h1 id="game-title" class="text-3xl font-bold text-amber-900 text-center">Brett Mensch Ärgere Dich Nicht</h1>
+    <p class="text-amber-700 text-center">Wähle die Anzahl der KI-Spieler:</p>
+    <div class="flex gap-3">
+     <button onclick="startGame(3)" class="px-5 py-3 bg-amber-600 text-white rounded-xl font-bold hover:bg-amber-700 transition">3 KI</button> <button onclick="startGame(4)" class="px-5 py-3 bg-amber-600 text-white rounded-xl font-bold hover:bg-amber-700 transition">4 KI</button>
+    </div>
+    <div class="flex gap-2 items-center mt-4">
+     <div class="w-5 h-5 rounded-full bg-red-500 border-2 border-red-700"></div><span class="text-sm text-amber-800">Du (Rot)</span>
+     <div class="w-5 h-5 rounded-full bg-blue-500 border-2 border-blue-700 ml-3"></div><span class="text-sm text-amber-800">KI (Blau)</span>
+     <div class="w-5 h-5 rounded-full bg-green-500 border-2 border-green-700 ml-3"></div><span class="text-sm text-amber-800">KI (Grün)</span>
+     <div class="w-5 h-5 rounded-full bg-yellow-500 border-2 border-yellow-700 ml-3"></div><span class="text-sm text-amber-800">KI (Gelb)</span>
+    </div>
+   </div><!-- Game Screen -->
+   <div id="game-screen" class="hidden flex flex-col items-center gap-3 w-full max-w-2xl">
+    <h2 id="game-title-play" class="text-2xl font-bold text-amber-900">Brett Mensch Ärgere Dich Nicht</h2>
+    <div id="status-bar" class="text-lg font-semibold text-amber-800 bg-white/60 px-4 py-2 rounded-xl shadow-sm"></div><!-- Board -->
+    <div id="board-container" class="relative bg-amber-100 border-4 border-amber-800 rounded-2xl p-3 shadow-xl">
+     <canvas id="board-canvas" width="380" height="380"></canvas>
+     <div id="pieces-layer" class="absolute inset-0 pointer-events-none" style="padding:12px;"></div>
+    </div><!-- Controls -->
+    <div class="flex gap-4 items-center">
+     <button id="roll-btn" onclick="rollDice()" class="px-6 py-3 bg-red-600 text-white rounded-xl font-bold text-lg hover:bg-red-700 transition shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"> 🎲 Würfeln </button>
+     <div id="dice-display" class="text-4xl font-bold text-amber-900 w-16 h-16 flex items-center justify-center bg-white rounded-xl shadow-lg border-2 border-amber-300">
+      -
+     </div>
+    </div>
+    <div id="message" class="text-amber-700 font-medium h-6"></div><button onclick="resetGame()" class="text-sm text-amber-600 underline hover:text-amber-800">Neues Spiel</button>
+   </div>
+   <div id="toast" class="toast bg-green-600"></div>
+  </div>
+  <script>
+// Game constants
+const PLAYERS = { RED: 0, BLUE: 1, GREEN: 2, YELLOW: 3 };
+const COLORS = ['#ef4444', '#3b82f6', '#22c55e', '#eab308'];
+const COLOR_DARK = ['#b91c1c', '#1d4ed8', '#15803d', '#a16207'];
+const COLOR_NAMES = ['Rot (Du)', 'Blau (KI)', 'Grün (KI)', 'Gelb (KI)'];
+const BOARD_SIZE = 380;
+
+// Board layout: 40 cells in a loop
+// Each player starts at a different position: Red=0, Blue=10, Green=20, Yellow=30
+const START_POS = [0, 10, 20, 30];
+
+// Board cell positions (x, y) for 40 cells around the board
+const CELL_POSITIONS = [];
+const HOME_POSITIONS = []; // 4 players x 4 home cells
+const BASE_POSITIONS = []; // 4 players x 4 base cells
+const FINISH_POSITIONS = []; // 4 players x 4 finish cells
+
+// Generate board layout
+(function generateLayout() {
+  const cx = 190, cy = 190, r = 150, innerR = 70;
+  // 40 cells in a circle
+  for (let i = 0; i < 40; i++) {
+    const angle = (i / 40) * Math.PI * 2 - Math.PI / 2;
+    CELL_POSITIONS.push({ x: cx + Math.cos(angle) * r, y: cy + Math.sin(angle) * r });
+  }
+  // Base positions (starting area) - corners
+  const corners = [
+    { bx: 45, by: 45 },   // Red top-left
+    { bx: 335, by: 45 },  // Blue top-right
+    { bx: 335, by: 335 }, // Green bottom-right
+    { bx: 45, by: 335 },  // Yellow bottom-left
+  ];
+  for (let p = 0; p < 4; p++) {
+    BASE_POSITIONS[p] = [];
+    for (let i = 0; i < 4; i++) {
+      const ox = (i % 2) * 30 - 15;
+      const oy = Math.floor(i / 2) * 30 - 15;
+      BASE_POSITIONS[p].push({ x: corners[p].bx + ox, y: corners[p].by + oy });
+    }
+  }
+  // Finish positions (center area toward middle)
+  for (let p = 0; p < 4; p++) {
+    FINISH_POSITIONS[p] = [];
+    const angle = (START_POS[p] / 40) * Math.PI * 2 - Math.PI / 2;
+    for (let i = 0; i < 4; i++) {
+      const dist = innerR + i * 18;
+      FINISH_POSITIONS[p].push({ x: cx + Math.cos(angle) * dist, y: cy + Math.sin(angle) * dist });
+    }
+  }
+})();
+
+// Game state
+let numAI = 2;
+let currentPlayer = 0;
+let numPlayers = 3;
+let diceValue = 0;
+let diceRolled = false;
+let gameOver = false;
+let awaitingPieceSelection = false;
+let movablePieces = [];
+
+// pieces[player][pieceIndex] = { state: 'base'|'board'|'finish', pos: number }
+let pieces = [];
+
+function initPieces() {
+  pieces = [];
+  for (let p = 0; p < numPlayers; p++) {
+    pieces[p] = [];
+    for (let i = 0; i < 4; i++) {
+      pieces[p].push({ state: 'base', pos: i });
+    }
+  }
+}
+
+function startGame(ai) {
+  numAI = ai;
+  numPlayers = 1 + ai;
+  currentPlayer = 0;
+  diceValue = 0;
+  diceRolled = false;
+  gameOver = false;
+  awaitingPieceSelection = false;
+  initPieces();
+  document.getElementById('setup-screen').classList.add('hidden');
+  document.getElementById('game-screen').classList.remove('hidden');
+  updateStatus();
+  drawBoard();
+  renderPieces();
+}
+
+function resetGame() {
+  document.getElementById('setup-screen').classList.remove('hidden');
+  document.getElementById('game-screen').classList.add('hidden');
+  gameOver = false;
+}
+
+function updateStatus() {
+  const s = document.getElementById('status-bar');
+  if (gameOver) { s.textContent = '🏆 Spiel beendet!'; return; }
+  if (currentPlayer === 0) {
+    s.textContent = diceRolled ? '🔴 Wähle eine Figur zum Ziehen' : '🔴 Du bist dran – würfle!';
+  } else {
+    s.textContent = `${['','🔵','🟢','🟡'][currentPlayer]} ${COLOR_NAMES[currentPlayer]} ist dran...`;
+  }
+  document.getElementById('roll-btn').disabled = currentPlayer !== 0 || diceRolled || gameOver;
+}
+
+function setMessage(msg) {
+  document.getElementById('message').textContent = msg;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function drawBoard() {
+  const canvas = document.getElementById('board-canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, BOARD_SIZE, BOARD_SIZE);
+
+  // Draw path cells
+  for (let i = 0; i < 40; i++) {
+    const p = CELL_POSITIONS[i];
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 14, 0, Math.PI * 2);
+    // Color start cells
+    let fill = '#fff';
+    for (let pl = 0; pl < numPlayers; pl++) {
+      if (i === START_POS[pl]) fill = COLORS[pl] + '40';
+    }
+    ctx.fillStyle = fill;
+    ctx.fill();
+    ctx.strokeStyle = '#78350f';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  }
+
+  // Draw base cells
+  for (let p = 0; p < numPlayers; p++) {
+    for (let i = 0; i < 4; i++) {
+      const pos = BASE_POSITIONS[p][i];
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y, 14, 0, Math.PI * 2);
+      ctx.fillStyle = COLORS[p] + '30';
+      ctx.fill();
+      ctx.strokeStyle = COLOR_DARK[p];
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+  }
+
+  // Draw finish cells
+  for (let p = 0; p < numPlayers; p++) {
+    for (let i = 0; i < 4; i++) {
+      const pos = FINISH_POSITIONS[p][i];
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y, 12, 0, Math.PI * 2);
+      ctx.fillStyle = COLORS[p] + '50';
+      ctx.fill();
+      ctx.strokeStyle = COLOR_DARK[p];
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+  }
+}
+
+function renderPieces() {
+  const layer = document.getElementById('pieces-layer');
+  layer.innerHTML = '';
+  layer.style.pointerEvents = 'none';
+
+  for (let p = 0; p < numPlayers; p++) {
+    for (let i = 0; i < 4; i++) {
+      const piece = pieces[p][i];
+      let pos;
+      if (piece.state === 'base') pos = BASE_POSITIONS[p][piece.pos];
+      else if (piece.state === 'board') pos = CELL_POSITIONS[getBoardIndex(p, piece.pos)];
+      else pos = FINISH_POSITIONS[p][piece.pos];
+
+      const el = document.createElement('div');
+      el.style.position = 'absolute';
+      el.style.left = (pos.x - 11) + 'px';
+      el.style.top = (pos.y - 11) + 'px';
+      el.style.width = '22px';
+      el.style.height = '22px';
+      el.style.borderRadius = '50%';
+      el.style.backgroundColor = COLORS[p];
+      el.style.border = `2px solid ${COLOR_DARK[p]}`;
+      el.style.boxShadow = '0 2px 4px rgba(0,0,0,0.3)';
+      el.style.transition = 'all 0.3s';
+      el.style.zIndex = '10';
+
+      const isMovable = awaitingPieceSelection && currentPlayer === 0 && movablePieces.includes(i) && p === 0;
+      if (isMovable) {
+        el.style.pointerEvents = 'auto';
+        el.style.cursor = 'pointer';
+        el.style.boxShadow = '0 0 0 3px rgba(255,255,0,0.8), 0 2px 8px rgba(0,0,0,0.4)';
+        el.style.transform = 'scale(1.2)';
+        el.onclick = () => selectPiece(i);
+      }
+
+      layer.appendChild(el);
+    }
+  }
+}
+
+// Convert player-relative position to absolute board index
+function getBoardIndex(player, relPos) {
+  return (START_POS[player] + relPos) % 40;
+}
+
+function rollDice() {
+  if (currentPlayer !== 0 || diceRolled || gameOver) return;
+  diceValue = Math.floor(Math.random() * 6) + 1;
+  diceRolled = true;
+
+  const dd = document.getElementById('dice-display');
+  dd.classList.add('dice-rolling');
+  dd.textContent = ['⚀','⚁','⚂','⚃','⚄','⚅'][diceValue - 1];
+  setTimeout(() => dd.classList.remove('dice-rolling'), 500);
+
+  setTimeout(() => processPlayerTurn(), 600);
+}
+
+function processPlayerTurn() {
+  movablePieces = getMovablePieces(currentPlayer, diceValue);
+
+  if (movablePieces.length === 0) {
+    setMessage(`Keine Zugmöglichkeit mit ${diceValue}.`);
+    setTimeout(() => { setMessage(''); nextTurn(); }, 1000);
+    return;
+  }
+
+  if (currentPlayer === 0) {
+    // Human player
+    if (movablePieces.length === 1) {
+      movePiece(0, movablePieces[0], diceValue);
+      setTimeout(() => afterMove(), 400);
+    } else {
+      awaitingPieceSelection = true;
+      updateStatus();
+      renderPieces();
+    }
+  } else {
+    // AI
+    const choice = aiChoose(currentPlayer, movablePieces, diceValue);
+    movePiece(currentPlayer, choice, diceValue);
+    setTimeout(() => afterMove(), 400);
+  }
+}
+
+function selectPiece(pieceIdx) {
+  if (!awaitingPieceSelection) return;
+  awaitingPieceSelection = false;
+  movePiece(0, pieceIdx, diceValue);
+  setTimeout(() => afterMove(), 400);
+}
+
+function afterMove() {
+  if (checkWin(currentPlayer)) {
+    gameOver = true;
+    const winner = currentPlayer === 0 ? 'Du hast gewonnen! 🎉' : `${COLOR_NAMES[currentPlayer]} hat gewonnen!`;
+    showToast(winner);
+    updateStatus();
+    renderPieces();
+    return;
+  }
+  // Extra turn on 6
+  if (diceValue === 6) {
+    diceRolled = false;
+    setMessage('Noch einmal würfeln (6)!');
+    if (currentPlayer === 0) {
+      updateStatus();
+      renderPieces();
+    } else {
+      setTimeout(() => aiTurn(), 800);
+    }
+  } else {
+    nextTurn();
+  }
+}
+
+function nextTurn() {
+  currentPlayer = (currentPlayer + 1) % numPlayers;
+  diceRolled = false;
+  diceValue = 0;
+  setMessage('');
+  updateStatus();
+  renderPieces();
+
+  if (currentPlayer !== 0 && !gameOver) {
+    setTimeout(() => aiTurn(), 800);
+  }
+}
+
+function aiTurn() {
+  if (gameOver) return;
+  diceValue = Math.floor(Math.random() * 6) + 1;
+  diceRolled = true;
+
+  const dd = document.getElementById('dice-display');
+  dd.textContent = ['⚀','⚁','⚂','⚃','⚄','⚅'][diceValue - 1];
+  dd.classList.add('dice-rolling');
+  setTimeout(() => dd.classList.remove('dice-rolling'), 500);
+
+  updateStatus();
+  setTimeout(() => processPlayerTurn(), 700);
+}
+
+function getMovablePieces(player, dice) {
+  const result = [];
+  for (let i = 0; i < 4; i++) {
+    const p = pieces[player][i];
+    if (p.state === 'base') {
+      if (dice === 6) {
+        // Check if start cell is free of own piece
+        if (!ownPieceAt(player, 0)) result.push(i);
+      }
+    } else if (p.state === 'board') {
+      const newPos = p.pos + dice;
+      if (newPos < 40) {
+        // Check not blocked by own piece on board
+        if (!ownPieceAtBoard(player, newPos)) result.push(i);
+      } else if (newPos >= 40 && newPos < 44) {
+        // Enter finish
+        const finishIdx = newPos - 40;
+        if (!ownPieceAtFinish(player, finishIdx)) result.push(i);
+      }
+    } else if (p.state === 'finish') {
+      const newFinish = p.pos + dice;
+      if (newFinish < 4 && !ownPieceAtFinish(player, newFinish)) result.push(i);
+    }
+  }
+  return result;
+}
+
+function ownPieceAt(player, relPos) {
+  return pieces[player].some(p => p.state === 'board' && p.pos === relPos);
+}
+
+function ownPieceAtBoard(player, relPos) {
+  return pieces[player].some(p => p.state === 'board' && p.pos === relPos);
+}
+
+function ownPieceAtFinish(player, idx) {
+  return pieces[player].some(p => p.state === 'finish' && p.pos === idx);
+}
+
+function movePiece(player, pieceIdx, dice) {
+  const p = pieces[player][pieceIdx];
+
+  if (p.state === 'base') {
+    // Move to start
+    p.state = 'board';
+    p.pos = 0;
+    // Capture at start
+    captureAt(player, 0);
+  } else if (p.state === 'board') {
+    const newPos = p.pos + dice;
+    if (newPos >= 40) {
+      p.state = 'finish';
+      p.pos = newPos - 40;
+    } else {
+      p.pos = newPos;
+      captureAt(player, newPos);
+    }
+  } else if (p.state === 'finish') {
+    p.pos = p.pos + dice;
+  }
+
+  renderPieces();
+}
+
+function captureAt(player, relPos) {
+  const absPos = getBoardIndex(player, relPos);
+  for (let op = 0; op < numPlayers; op++) {
+    if (op === player) continue;
+    for (let i = 0; i < 4; i++) {
+      if (pieces[op][i].state === 'board') {
+        const opAbs = getBoardIndex(op, pieces[op][i].pos);
+        if (opAbs === absPos) {
+          // Send back to base
+          pieces[op][i].state = 'base';
+          pieces[op][i].pos = getEmptyBase(op);
+          if (player === 0) showToast('Figur geschlagen! 💥');
+          else if (op === 0) showToast('Deine Figur wurde geschlagen! 😢');
+        }
+      }
+    }
+  }
+}
+
+function getEmptyBase(player) {
+  const used = pieces[player].filter(p => p.state === 'base').map(p => p.pos);
+  for (let i = 0; i < 4; i++) { if (!used.includes(i)) return i; }
+  return 0;
+}
+
+function checkWin(player) {
+  return pieces[player].every(p => p.state === 'finish');
+}
+
+function aiChoose(player, movable, dice) {
+  // Priority: capture > enter finish > leave base > advance furthest
+  let best = movable[0];
+  let bestScore = -1;
+
+  for (const idx of movable) {
+    let score = 0;
+    const p = pieces[player][idx];
+
+    if (p.state === 'base') {
+      score = 10; // Leaving base is good
+    } else if (p.state === 'board') {
+      const newPos = p.pos + dice;
+      if (newPos >= 40) {
+        score = 50; // Entering finish is best
+      } else {
+        // Check if captures
+        const absNew = getBoardIndex(player, newPos);
+        for (let op = 0; op < numPlayers; op++) {
+          if (op === player) continue;
+          for (const opp of pieces[op]) {
+            if (opp.state === 'board' && getBoardIndex(op, opp.pos) === absNew) {
+              score = 30;
+            }
+          }
+        }
+        if (score === 0) score = newPos; // Advance further
+      }
+    } else {
+      score = 5;
+    }
+
+    if (score > bestScore) { bestScore = score; best = idx; }
+  }
+  return best;
+}
+
+// Element SDK
+const defaultConfig = {
+  game_title: 'Brett Mensch Ärgere Dich Nicht',
+  background_color: '#fffbeb',
+  surface_color: '#fef3c7',
+  text_color: '#78350f',
+  primary_action: '#dc2626',
+  secondary_action: '#d97706',
+  font_family: 'Fredoka',
+  font_size: 16
+};
+
+window.elementSdk.init({
+  defaultConfig,
+  onConfigChange: async (config) => {
+    const title = config.game_title || defaultConfig.game_title;
+    const el1 = document.getElementById('game-title');
+    const el2 = document.getElementById('game-title-play');
+    if (el1) el1.textContent = title;
+    if (el2) el2.textContent = title;
+
+    const bg = config.background_color || defaultConfig.background_color;
+    const surface = config.surface_color || defaultConfig.surface_color;
+    const text = config.text_color || defaultConfig.text_color;
+    const primary = config.primary_action || defaultConfig.primary_action;
+    const secondary = config.secondary_action || defaultConfig.secondary_action;
+    const font = config.font_family || defaultConfig.font_family;
+    const size = config.font_size || defaultConfig.font_size;
+
+    document.getElementById('app').style.background = `linear-gradient(135deg, ${bg}, ${surface})`;
+    document.querySelectorAll('h1,h2').forEach(e => { e.style.color = text; e.style.fontFamily = `${font}, sans-serif`; e.style.fontSize = `${size * 1.8}px`; });
+    document.getElementById('roll-btn').style.backgroundColor = primary;
+    document.querySelectorAll('#setup-screen button').forEach(b => { b.style.backgroundColor = secondary; });
+    document.body.style.fontFamily = `${font}, sans-serif`;
+    document.body.style.fontSize = `${size}px`;
+  },
+  mapToCapabilities: (config) => ({
+    recolorables: [
+      { get: () => config.background_color || defaultConfig.background_color, set: (v) => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); } },
+      { get: () => config.surface_color || defaultConfig.surface_color, set: (v) => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); } },
+      { get: () => config.text_color || defaultConfig.text_color, set: (v) => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); } },
+      { get: () => config.primary_action || defaultConfig.primary_action, set: (v) => { config.primary_action = v; window.elementSdk.setConfig({ primary_action: v }); } },
+      { get: () => config.secondary_action || defaultConfig.secondary_action, set: (v) => { config.secondary_action = v; window.elementSdk.setConfig({ secondary_action: v }); } },
+    ],
+    borderables: [],
+    fontEditable: { get: () => config.font_family || defaultConfig.font_family, set: (v) => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); } },
+    fontSizeable: { get: () => config.font_size || defaultConfig.font_size, set: (v) => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); } },
+  }),
+  mapToEditPanelValues: (config) => new Map([
+    ['game_title', config.game_title || defaultConfig.game_title]
+  ])
+});
+
+lucide.createIcons();
+</script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9f979616a1255e99',t:'MTc3ODQwMTg3Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
