@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BRETT Startseite</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="nav-wrap">
+    <div class="brand"><span class="mark">BRETT</span><span class="tag">We know</span></div>
+    <nav class="links">
+      <a href="mainpage.html" class="active">Willkommen</a>
+      <a href="downloadcenter_new.html">Downloads</a>
+      <a href="Online-tools.html">Onlinetools</a>
+      <a href="Lizenz.html">Lizenz</a>
+      <a href="brett-spiele.html">Spiele</a>
+    </nav>
+   
+  </div>
+</header>
+
+<main>
+  
+  <h1 class="page-title">Willkommen</h1>
+  <p class="lede">Wir haben der BRETT-Webseite ein komplett neues Design gegeben und das komplette System neu geschrieben.</p>
+
+  <div class="banner">
+    <span class="dot"></span>
+    <div>
+      <strong style="color:var(--paper); font-family:'Rajdhani',sans-serif; font-size:1.05rem;">zOS ist in der Entwicklung!</strong>
+      <p style="margin:6px 0 0; color:var(--ash); font-size:0.9rem;">Das zOS wurde in dieser Woche erstellt und weiterbearbeitet. Es wird noch eine Zeit dauern, bis es kommt. Mehr auf der zOS Webseite. <a href="https://zospage.github.io/zOS/">Mehr</a></p>
+    </div>
+  </div>
+
+  <hr class="ember">
+
+  <h2 style="font-size:1.3rem; margin-bottom:6px;">Bewerten sie das neue System</h2>
+  <p class="lede" style="margin-top:6px;">Die Bewertung wird nach dem Klicken automatisch übermittelt.</p>
+  <div class="rating">
+    <div class="stars" id="stars">
+      <span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span>
+    </div>
+    <div class="rating-label" id="ratingLabel">Bewertung: 0 Sterne</div>
+  </div>
+
+  <hr class="ember">
+
+  <h2 style="font-size:1.3rem; margin-bottom:18px;">Aktuelle News</h2>
+  <ul class="news">
+    <li><span>VideoBrett</span>&nbsp;wurde eingestellt.</li>
+    <li><span>BrettApp</span>&nbsp;kommt.</li>
+    <li><span>Brett Live Studio 5</span>&nbsp;ist da.</li>
+    <li>Alle Programme bekommen wieder neue Logos.</li>
+    <li><span>zOS!!!</span>&nbsp;ES ist da! Das Betriebssystem!</li>
+  </ul>
+</main>
+
+<footer><span class="mark">BRETT</span> — We know.</footer>
+
+<script>
+  const stars = document.querySelectorAll('#stars span');
+  const label = document.getElementById('ratingLabel');
+  let current = 0;
+  function paint(v){
+    stars.forEach(s => s.classList.toggle('filled', +s.dataset.v <= v));
+  }
+  stars.forEach(s => {
+    s.addEventListener('mouseenter', () => paint(+s.dataset.v));
+    s.addEventListener('mouseleave', () => paint(current));
+    s.addEventListener('click', () => {
+      current = +s.dataset.v;
+      paint(current);
+      label.textContent = 'Bewertung: ' + current + ' Sterne';
+    });
+  });
+</script>
+
+</body>
+</html>
