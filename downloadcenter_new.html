@@ -18,7 +18,7 @@
       <a href="Lizenz.html">Lizenz</a>
       <a href="brett-spiele.html">Spiele</a>
     </nav>
- 
+    <a href="#" class="logout">Logout</a>
   </div>
 </header>
 
@@ -28,35 +28,54 @@
   <p class="lede">Wir freuen uns sehr, dass sie Programme von uns herunterladen möchten! Laden sie eines der folgenden Programme herunter.</p>
 
   <div class="grid">
+
+    <!-- Notizbrett -> eigene Unterseite -->
     <div class="card">
       <span class="num">01</span>
       <h3>Notizbrett</h3>
       <p>Schnelle, aufgeräumte Notizen — immer griffbereit.</p>
-      <a class="btn" href="#">Herunterladen</a>
+      <a class="btn" href="../Notizbrett.html">Zur Downloadseite</a>
     </div>
+
+    <!-- BrettBrowser -> direkter Download -->
     <div class="card">
       <span class="num">02</span>
       <h3>BrettBrowser</h3>
       <p>Der eigene Browser aus dem BRETT-Ökosystem.</p>
-      <a class="btn" href="#">Herunterladen</a>
+      <a class="btn" href="BrettBrowser.html">Herunterladen (.zip)</a>
     </div>
+
+    <!-- Musikbrett -> eigene Unterseite -->
     <div class="card">
       <span class="num">03</span>
       <h3>Musikbrett</h3>
       <p>Musik hören, ordnen und verwalten an einem Ort.</p>
-      <a class="btn" href="#">Herunterladen</a>
+      <a class="btn" href="../musikbrett_dev.html">Zur Downloadseite</a>
     </div>
+
+    <!-- Zeichenbrett Pro -> zwei direkte Downloads -->
     <div class="card">
       <span class="num">04</span>
       <h3>Zeichenbrett Pro</h3>
       <p>Digitales Zeichnen mit professionellen Werkzeugen.</p>
-      <a class="btn" href="#">Herunterladen</a>
+      <div style="display:flex; gap:14px; flex-wrap:wrap; margin-top:4px;">
+        <a class="btn" href="../Zeichenbrett_pro.zip">x64</a>
+        <a class="btn" href="../Zeichenbrett_pro_arm64.zip">ARM64</a>
+      </div>
     </div>
-    
+
+    <!-- Animationsbrett -> noch kein Download vorhanden -->
+    <div class="card" style="opacity:0.6;">
+      <span class="num">05</span>
+      <h3>Animationsbrett</h3>
+      <p>Animationen erstellen, Frame für Frame.</p>
+      <span class="btn" style="color:var(--ash-dim); cursor:default;">Bald verfügbar</span>
+    </div>
+
   </div>
 </main>
 
-<footer><span class="mark">BRETT</span> — We know.</footer>
+<footer>© 2025–2026 <span class="mark">BRETT</span> — We know.</footer>
 
 </body>
 </html>
