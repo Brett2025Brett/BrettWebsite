@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brett Unicode Explorer</title>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    .tool-panel{
+      background:linear-gradient(180deg, var(--char-2), var(--char));
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      padding:28px 30px;
+      margin-top:30px;
+    }
+    .controls{ display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-bottom:6px; }
+    .controls label{ font-size:0.85rem; color:var(--ash); }
+    select, input[type="text"]{
+      background:var(--void);
+      border:1px solid var(--line);
+      color:var(--paper);
+      font-family:'Inter', sans-serif;
+      font-size:0.88rem;
+      padding:10px 12px;
+      border-radius:8px;
+      outline:none;
+      transition:border-color .2s ease;
+    }
+    select{ min-width:280px; }
+    select:focus, input:focus{ border-color:var(--ember); }
+    .tool-btn{
+      font-family:'Rajdhani',sans-serif; font-weight:700; font-size:0.9rem;
+      letter-spacing:0.02em;
+      padding:10px 22px; border-radius:8px; border:none; cursor:pointer;
+      color:var(--void);
+      background:linear-gradient(135deg, var(--glow), var(--ember));
+      box-shadow:0 10px 24px -10px rgba(255,90,31,0.55);
+      transition:transform .2s ease;
+    }
+    .tool-btn:hover{ transform:translateY(-2px); }
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(58px, 1fr));
+      gap: 10px;
+      margin-top: 26px;
+    }
+    .charBox {
+      background: var(--void);
+      border:1px solid var(--line);
+      padding: 10px 6px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 1.4rem;
+      color: var(--paper);
+      cursor: pointer;
+      transition: transform .15s ease, border-color .15s ease, background .15s ease;
+    }
+    .charBox:hover {
+      background: rgba(255,138,61,0.1);
+      border-color: var(--ember);
+      transform: scale(1.08);
+    }
+    .info {
+      font-size: 0.62rem;
+      color: var(--ash);
+      margin-top:4px;
+    }
+  </style>
+</head>
+<body>
+
+<header class="top">
+  <div class="nav-wrap">
+    <div class="brand"><span class="mark">BRETT</span><span class="tag">We know</span></div>
+    <nav class="links">
+      <a href="../mainpage.html">Willkommen</a>
+      <a href="../downloadcenter_new.html">Downloads</a>
+      <a href="../Online-tools.html" class="active">Onlinetools</a>
+      <a href="../Lizenz.html">Lizenz</a>
+      <a href="../brett-spiele.html">Spiele</a>
+    </nav>
+    <a href="#" class="logout">Logout</a>
+  </div>
+</header>
+
+<main>
+  <a class="back-link" href="../Online-tools.html">Zurück zu Onlinetools</a>
+  <span class="eyebrow">Onlinetool</span>
+  <h1 class="page-title">BRETT Unicode Explorer</h1>
+  <p class="lede">Unicode-Blöcke durchsuchen oder gezielt nach einem Codepoint suchen.</p>
+
+  <div class="tool-panel">
+    <div class="controls">
+      <label>Unicode-Block auswählen:</label>
+      <select id="blockSelect"></select>
+      <button class="tool-btn" onclick="loadBlock()">Laden</button>
+    </div>
+
+    <hr class="ember" style="margin:22px 0;">
+
+    <div class="controls">
+      <label>Manuelle Unicode-Eingabe (Hex):</label>
+      <input type="text" id="manualInput" placeholder="z. B. 1F984 für 🦄" />
+      <button class="tool-btn" onclick="searchChar()">Zeichen anzeigen</button>
+    </div>
+
+    <div id="grid"></div>
+  </div>
+</main>
+
+<footer>© 2025–2026 <span class="mark">BRETT</span> — We know.</footer>
+
+<script>
+  function copyChar(char) {
+    navigator.clipboard.writeText(char).then(() => {
+      alert("Kopiert: " + char);
+    });
+  }
+
+  function loadBlock() {
+    const grid = document.getElementById("grid");
+    grid.innerHTML = "";
+    const range = document.getElementById("blockSelect").value.split("-");
+    let start = parseInt(range[0], 16);
+    let end = parseInt(range[1], 16);
+
+    while (start <= end) {
+      try {
+        const char = String.fromCodePoint(start);
+        const box = document.createElement("div");
+        box.className = "charBox";
+        box.innerHTML = char + "<div class='info'>U+" + start.toString(16).toUpperCase().padStart(4, '0') + "</div>";
+        box.onclick = () => copyChar(char);
+        grid.appendChild(box);
+      } catch (e) {}
+      start++;
+    }
+  }
+
+  function searchChar() {
+    const grid = document.getElementById("grid");
+    grid.innerHTML = "";
+    const hex = document.getElementById("manualInput").value.trim();
+    if (!hex) return;
+    const code = parseInt(hex, 16);
+    try {
+      const char = String.fromCodePoint(code);
+      const box = document.createElement("div");
+      box.className = "charBox";
+      box.innerHTML = char + "<div class='info'>U+" + hex.toUpperCase() + "</div>";
+      box.onclick = () => copyChar(char);
+      grid.appendChild(box);
+    } catch (e) {
+      alert("Ungültiger Codepoint.");
+    }
+  }
+// Vollständige Unicode-Blocks aus Blocks.txt
+  const blocks = {
+  "0000-007F": "Grundlegendes Latein (ASCII)",
+  "0080-00FF": "Lateinisch-1 Ergänzung",
+  "0100-017F": "Lateinisch Erweiterung A",
+  "0180-024F": "Lateinisch Erweiterung B",
+  "0250-02AF": "IPA-Erweiterungen (phonetisch)",
+  "02B0-02FF": "Modifizierer-Buchstaben",
+  "0300-036F": "Kombinierende diakritische Zeichen",
+  "0370-03FF": "Griechisch & Koptisch",
+  "0400-04FF": "Kyrillisch",
+  "0530-058F": "Armenisch",
+  "0590-05FF": "Hebräisch",
+  "0600-06FF": "Arabisch",
+  "0900-097F": "Devanagari (Indisch)",
+  "0E00-0E7F": "Thai",
+  "10A0-10FF": "Georgisch",
+  "16A0-16FF": "Runenschrift",
+  "1F300-1F5FF": "Sonstige Symbole & Piktogramme",
+  "1F600-1F64F": "Emojis (Smileys & Emotionen)",
+  "1F680-1F6FF": "Transport & Karten-Symbole",
+  "1F700-1F77F": "Alchemistische Symbole",
+  "2000-206F": "Interpunktion & Steuerzeichen",
+  "2200-22FF": "Mathematische Operatoren",
+  "2300-23FF": "Technische Symbole",
+  "25A0-25FF": "Geometrische Formen",
+  "2600-26FF": "Sonstige grafische Symbole",
+  "2700-27BF": "Dingbats (Dekosymbole)",
+  "A000-A4CF": "Phonetische & Yi-Zeichen",
+  "1D400-1D7FF": "Mathematische Buchstaben",
+  "10A00-10AFF": "Kharoshthi (altindisch)",
+  "11000-1107F": "Kaithi (historisch)",
+  "1F900-1F9FF": "Zusätzliche Emojis & Piktogramme",
+  "1D100-1D1FF": "Musiknotation",
+  "12000-123FF": "Keilschrift",
+  "13000-1342F": "Hieroglyphen(Ägyptisch)",
+  "17000-187FF": "Tangut-Schrift(ostasisch)",
+  "1E900-1E95F": "Adlam(Westafrikanisch)",
+  "1BC00-1BC9F": "Duploye-Stenografie",
+  "1D000-1D0FF": "Byzantische Musiknotation",
+  "1D200-1D24F": "Gregoranische Notation & Symbole",
+  "1F780-1F7FF": "Geomerische Symbole(Erweiterung)",
+  "1F800-1F8FF": "CJK-Kompatiblitätszeichen für Notation",
+  "E0000-F8FF": "Private Use area",
+  "FE00-FE0F": "Variation Selectors",
+  "FFF0-FFFF": "Spezialzeichen & steuerzeichen",
+  "1F2E0-1F2FF": "Symbolische Gebäudesrukturen",
+  "1F780-1F7FF": "1-Ging-Hexagramme  mystische Diagramme",
+  "1FA00-1FA6F": "Chess symbols und Mahjong steine",
+  "1D2E0-1D2FF": "Mathematik Erweiterung für Brüche und Operationen",
+  "1D300-1D35F": "Tai-Chi,Diagramme , Axiome",
+  "1BCA0-1BCFF": "BETA-UNICODE Shorthand format charakters",
+  "1F700-1F77F": "BETA-UNICODE Chemische Symbole , Substanzen",
+  "2D30-2D7F": "Tifinagh",
+  "A800-A82F": "Syloti Nagri",
+  "A500-A63F": "Vai",
+  "10480-104AF": "Osmanya",
+  "2C00-2C5F": "Glagolitisch",
+  "1D200-1D24F": "Ancient Greek Music Notation",
+  "1CF00-1CFCF": "Znamenny Musical Notation",
+  "2A00-2AFF": "Supplemental Mathematical Operators",
+  "27C0-27FF": "Miscellaneous Methematical Symbols A",
+  "2980-29FF": "Miscellaneos Mathematical Symbols B",
+  "1FB00-1FBFF": "Symbols for Legacy Computing",
+  "4DC0-4DFF": "Yijing Hexagrammsymbole",
+  "10190-101CF": "Acient Symbols",
+  "1FA70-1FAFF": "Symbole ud Piktogramme Erweiterung",
+  "1F3FB-1F3FF": "Symbols for Emoji Modifiers",
+  "2400-243F": "Kontrollbilder",
+  "2440-245F": "OCR (Optical Character Recognition)",
+  "0500-052F": "Kyrillisch Ergänzung",
+  "0700-074F": "Syrisch",
+  "0780-07BF": "Thaana",
+  "07C0-07FF": "N'Ko",
+  "0800-083F": "Samaritanisch",
+  "0840-085F": "Mandäisch",
+  "0860-086F": "Syrisch Ergänzung",
+  "0870-089F": "Arabisch Erweiterung B",
+  "08A0-08FF": "Arabisch Erweiterung A",
+  "0980-09FF": "Bengalisch",
+  "0A00-0A7F": "Gurmukhi",
+  "0A80-0AFF": "Gujarati",
+  "0B00-0B7F": "Oriya",
+  "0B80-0BFF": "Tamil",
+  "0C00-0C7F": "Telugu",
+  "0C80-0CFF": "Kannada",
+  "0D00-0D7F": "Malayalam",
+  "0D80-0DFF": "Singhalesisch",
+  "0E80-0EFF": "Laotisch",
+  "0F00-0FFF": "Tibetisch",
+  "1000-109F": "Myanmar",
+  "1100-11FF": "Hangeul Jamo",
+  "1200-137F": "Äthiopisch",
+  "1380-139F": "Äthiopisch Zusatz",
+  "13A0-13FF": "Cherokee",
+  "1400-167F": "Kanadische Silbenschrift",
+  "1680-169F": "Ogam",
+  "1700-171F": "Tagalog",
+  "1720-173F": "Hanunóo",
+  "1740-175F": "Buhid",
+  "1760-177F": "Tagbanwa",
+  "1800-18AF": "Mongolisch",
+  "18B0-18FF": "Kanadische Silbenschrift Erweiterung",
+  "1900-194F": "Limbu",
+  "1950-197F": "Tai Le",
+  "1980-19DF": "Neu-Tai-Lue",
+  "19E0-19FF": "Khmer-Symbole",
+  "1A00-1A1F": "Buginesisch",
+  "1A20-1AAF": "Lanna",
+  "1AB0-1AFF": "Kombinierende diakritische Zeichen Erweiterung",
+  "1B00-1B7F": "Balinesisch",
+  "1B80-1BBF": "Sundanesisch",
+  "1BC0-1BFF": "Batak",
+  "1C00-1C4F": "Lepcha",
+  "1C50-1C7F": "Ol Chiki",
+  "1C80-1C8F": "Kyrillisch Erweiterung C",
+  "1C90-1CBF": "Georgisch Erweiterung",
+  "1CC0-1CCF": "Sundanesisch Ergänzung",
+  "1CD0-1CFF": "Vedische Erweiterungen",
+  "1D80-1DBF": "Phonetische Erweiterungen Ergänzung",
+  "1DC0-1DFF": "Kombinierende diakritische Zeichen Ergänzung",
+  "1E00-1EFF": "Lateinisch weiterer Zusatz",
+  "1F00-1FFF": "Griechisch Erweiterung",
+  "2070-209F": "Hoch- und tiefgestellte Zeichen",
+  "20A0-20CF": "Währungssymbole",
+  "20D0-20FF": "Kombinierende Zeichen für Symbole",
+  "2100-214F": "Buchstabenähnliche Symbole",
+  "2150-218F": "Zahlzeichen",
+  "2460-24FF": "Umschlossene alphanumerische Zeichen",
+  "2500-257F": "Rahmenzeichnung",
+  "2580-259F": "Blockelemente",
+  "2800-28FF": "Braille-Zeichen",
+  "2B00-2BFF": "Verschiedene Symbole und Pfeile",
+  "2C60-2C7F": "Lateinisch Erweiterung C",
+  "2C80-2CFF": "Koptisch",
+  "2D00-2D2F": "Georgisch Ergänzung",
+  "2D80-2DDF": "Äthiopisch Erweiterung",
+  "2DE0-2DFF": "Kyrillisch Erweiterung A",
+  "2E00-2E7F": "Zusätzliche Interpunktion",
+  "3000-303F": "CJK Symbole und Interpunktion",
+  "3040-309F": "Hiragana",
+  "30A0-30FF": "Katakana",
+  "3100-312F": "Bopomofo",
+  "3130-318F": "Hangeul Kompatibilität",
+  "3190-319F": "Kanbun",
+  "31A0-31BF": "Bopomofo Erweiterung",
+  "31C0-31EF": "CJK-Striche",
+  "31F0-31FF": "Katakana phonetische Erweiterung",
+  "3200-32FF": "Umschlossene CJK-Zeichen und Monate",
+  "3300-33FF": "CJK-Kompatibilität",
+  "3400-4DBF": "CJK-Ideogramme Erweiterung A",
+  "4E00-9FFF": "CJK-Ideogramme",
+  "A4D0-A4FF": "Lisu",
+  "A640-A69F": "Kyrillisch Erweiterung B",
+  "A6A0-A6FF": "Bamum",
+  "A700-A71F": "Modifizierende Tonzeichen",
+  "A720-A7FF": "Lateinisch Erweiterung D",
+  "A830-A83F": "Indische Ziffern",
+  "A840-A87F": "Phags-pa",
+  "A8E0-A8FF": "Devanagari Erweiterung",
+  "A900-A92F": "Kayah Li",
+  "A930-A95F": "Rejang",
+  "A960-A97F": "Hangeul Jamo Erweiterung A",
+  "A9E0-A9FF": "Myanmar Erweiterung B",
+  "AA00-AA5F": "Cham",
+  "AA60-AA7F": "Myanmar Erweiterung A",
+  "AA80-AADF": "Tai Viet",
+  "AAE0-AAFF": "Meetei Mayek Erweiterung",
+  "AB30-AB6F": "Lateinisch Erweiterung E",
+  "AB70-ABBF": "Cherokee Ergänzung",
+  "ABC0-ABFF": "Meetei Mayek",
+  "AC00-D7AF": "Hangeul-Silbenzeichen",
+  "D7B0-D7FF": "Hangeul Jamo Erweiterung B",
+  "F900-FAFF": "CJK-Kompatibilitätsideogramme",
+  "FB00-FB4F": "Alphabetische Präsentationsformen",
+  "FB50-FDFF": "Arabische Präsentationsformen A",
+  "FE10-FE1F": "Vertikale Formen",
+  "FE20-FE2F": "Kombinierende halbe diakritische Zeichen",
+  "FE30-FE4F": "CJK-Kompatibilitätsformen",
+  "FE50-FE6F": "Kleine Formvarianten",
+  "FE70-FEFF": "Arabische Präsentationsformen B",
+  "FF00-FFEF": "Halbbreite und vollbreite Formen",
+  "2E80-2EFF": "CJK-Radikale Ergänzung",
+  "2F00-2FDF": "Kangxi-Radikale",
+  "2FF0-2FFF": "Ideographische Beschreibungszeichen",
+  "3000-303F": "CJK-Symbole und Interpunktion",
+  "31C0-31EF": "CJK-Striche",
+  "3400-4DBF": "CJK-Ideogramme Erweiterung A",
+  "4E00-9FFF": "CJK-Ideogramme (Basisblock)",
+  "F900-FAFF": "CJK-Kompatibilitätsideogramme",
+  "20000-2A6DF": "CJK-Ideogramme Erweiterung B",
+  "2A700-2B73F": "CJK-Ideogramme Erweiterung C",
+  "2B740-2B81F": "CJK-Ideogramme Erweiterung D",
+  "2B820-2CEAF": "CJK-Ideogramme Erweiterung E",
+  "2CEB0-2EBEF": "CJK-Ideogramme Erweiterung F",
+  "30000-3134F": "CJK-Ideogramme Erweiterung G",
+  "31350-323AF": "CJK-Ideogramme Erweiterung H",
+  "2F800-2FA1F": "CJK-Kompatibilitätszeichen für Ideogramme",
+   "2F800-2FA1F": "CJK-Kompatibilitätszeichen für Ideogramme (Supplement)",
+  "2FF00-2FFFF": "Reservierter Bereich (Plane 2 Abschluss)",
+  "2FE00-2FEFF": "Ideographic Description Characters (Erweiterung)",
+  "2E000-2E7FF": "Reservierter Bereich (Plane 2)",
+  "2D000-2D7FF": "Reservierter Bereich (Plane 2)",
+  "2CEB0-2CEFF": "CJK Unified Ideographs Extension F (Ende)",
+  "2FA20-2FAFF": "Reservierter Bereich nach Kompatibilitätszeichen",
+  "2A6E0-2A6FF": "Reservierter Bereich nach Extension B",
+   "30000-3134F": "CJK Unified Ideographs Extension G",
+  "31350-323AF": "CJK Unified Ideographs Extension H",
+  "E0000-E007F": "Tags (für Sprache, Region, Skript)",
+  "E0100-E01EF": "Variation Selectors Supplement"
+
+};
+
+  const select = document.getElementById("blockSelect");
+  for (const [range, name] of Object.entries(blocks)) {
+    const option = document.createElement("option");
+    option.value = range;
+    option.textContent = `${name} (${range})`;
+    select.appendChild(option);
+  }
+</script>
+</body>
+</html>

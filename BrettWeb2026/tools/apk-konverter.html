@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XAPK zu APK Konverter — BRETT</title>
+<link rel="stylesheet" href="../style.css">
+<style>
+  .tool-panel{
+    background:linear-gradient(180deg, var(--char-2), var(--char));
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:32px;
+    margin-top:30px;
+    max-width:560px;
+  }
+  .drop{
+    border:1.5px dashed var(--line);
+    border-radius:10px;
+    padding:34px 20px;
+    text-align:center;
+    transition:border-color .2s ease, background .2s ease;
+  }
+  .drop:hover{ border-color:var(--ember); background:rgba(255,138,61,0.05); }
+  input[type="file"]{
+    color:var(--ash);
+    font-size:0.88rem;
+  }
+  #status{
+    margin-top:18px;
+    font-size:0.9rem;
+    color:var(--glow);
+    min-height:1.2em;
+  }
+  #status:empty{ display:none; }
+  a#apkDownloadLink, .tool-panel a{
+    display:inline-flex; align-items:center; gap:8px;
+    margin-top:14px;
+    font-family:'Rajdhani',sans-serif; font-weight:700; font-size:0.95rem;
+    color:var(--void);
+    background:linear-gradient(135deg, var(--glow), var(--ember));
+    padding:11px 22px; border-radius:8px;
+    box-shadow:0 10px 24px -10px rgba(255,90,31,0.55);
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="nav-wrap">
+    <div class="brand"><span class="mark">BRETT</span><span class="tag">We know</span></div>
+    <nav class="links">
+      <a href="../mainpage.html">Willkommen</a>
+      <a href="../downloadcenter_new.html">Downloads</a>
+      <a href="../Online-tools.html" class="active">Onlinetools</a>
+      <a href="../Lizenz.html">Lizenz</a>
+      <a href="../brett-spiele.html">Spiele</a>
+    </nav>
+    <a href="#" class="logout">Logout</a>
+  </div>
+</header>
+
+<main>
+  <a class="back-link" href="../Online-tools.html">Zurück zu Onlinetools</a>
+  <span class="eyebrow">Onlinetool</span>
+  <h1 class="page-title">XAPK zu APK Konverter</h1>
+  <p class="lede">XAPK zu APK konvertieren, kostenlos und direkt im Browser.</p>
+
+  <div class="banner">
+    <span class="dot"></span>
+    <div>
+      <strong style="color:var(--paper); font-family:'Rajdhani',sans-serif; font-size:1rem;">Wichtiger Hinweis</strong>
+      <p style="margin:6px 0 0; color:var(--ash); font-size:0.88rem;">Verwenden Sie den Konverter nur für persönliche Zwecke und hosten Sie die resultierenden APK-Dateien nicht.</p>
+    </div>
+  </div>
+
+  <div class="tool-panel">
+    <div class="drop">
+      <input type="file" id="xapkInput" accept=".xapk" />
+    </div>
+    <p id="status"></p>
+  </div>
+</main>
+
+<footer>© 2025–2026 <span class="mark">BRETT</span> — We know.</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.0/jszip.min.js"></script>
+<script>
+    document.getElementById('xapkInput').addEventListener('change', async function(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      document.getElementById('status').textContent = 'Lade und entpacke...';
+
+      try {
+        const zip = await JSZip.loadAsync(file);
+        const apkFile = Object.values(zip.files).find(f => f.name.endsWith('.apk'));
+
+        if (!apkFile) {
+          document.getElementById('status').textContent = 'Keine APK-Datei gefunden.';
+          return;
+        }
+
+        const apkBlob = await apkFile.async('blob');
+        const apkUrl = URL.createObjectURL(apkBlob);
+
+        const downloadLink = document.createElement('a');
+        downloadLink.href = apkUrl;
+        downloadLink.download = apkFile.name;
+        downloadLink.textContent = 'APK herunterladen';
+        document.querySelector('.tool-panel').appendChild(downloadLink);
+
+        document.getElementById('status').textContent = 'APK extrahiert!';
+      } catch (err) {
+        document.getElementById('status').textContent = 'Fehler beim Entpacken: ' + err.message;
+      }
+    });
+</script>
+
+</body>
+</html>
