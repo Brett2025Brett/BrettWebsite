@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BRETT BrettBrowser</title>
+<link rel="stylesheet" href="style2.css">
+<style>
+  .info-grid{ display:grid; gap:18px; margin-top:30px; grid-template-columns:1fr; max-width:760px; }
+  .info-card{
+    background:linear-gradient(180deg, var(--char-2), var(--char));
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:26px 28px;
+    color:var(--ash);
+    line-height:1.7;
+    font-size:0.95rem;
+  }
+  .info-card img{ border-radius:8px; border:1px solid var(--line); display:block; }
+  .credit{ font-size:0.85rem; color:var(--ash-dim); }
+</style>
+</head>
+
+<body>
+
+<header class="top">
+  <div class="nav-wrap">
+    <div class="brand"><span class="mark">BRETT</span><span class="tag">We know</span></div>
+    <nav class="links">
+      <a href="mainpage.html">Willkommen</a>
+      <a href="downloadcenter_new.html" class="active">Downloads</a>
+      <a href="Online-tools.html">Onlinetools</a>
+      <a href="Lizenz.html">Lizenz</a>
+      <a href="brett-spiele.html">Spiele</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <a class="back-link" href="downloadcenter_new.html">Zurück zu Downloads</a>
+  <span class="eyebrow">Downloadcenter</span>
+  <h1 class="page-title">BrettBrowser: Download und Infos</h1>
+
+  <div class="info-grid" id="grid">
+
+    <div class="info-card" draggable="true" data-id="1">
+      BRETTBrowser ist der Browser von BRETT. Wir haben ihn 2024 gestartet und wir haben es 2025 komplett Neuprogrammiert. Die Neue Version hat eine bessere WebView und ein funktionierendes Tabsystem. Für dieses Programm ist keine Online-Vorschau verfügbar.
+    </div>
+
+    <div class="info-card" draggable="true" data-id="2">
+      <button class="download-button" onclick="downloadBrettWebViewer()">Portable herunterladen (ZIP)</button>
+    </div>
+
+    <div class="info-card credit" draggable="true" data-id="3">
+      Programm erstellt von Jonas (2025), hochgeladen von Simon (2025), Text geschrieben von Jonas (2025)
+    </div>
+
+    <div class="info-card" draggable="true" data-id="4">
+      <img src="screenshots/Brettbrowser-Screenshot.png" height="200" length="290">
+    </div>
+
+  </div>
+</main>
+
+<script>
+  function downloadBrettWebViewer() {
+
+    const url = "https://github.com/brett2025brett/BrettWebsite/releases/download/BrettBrowser/Release.zip";
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "";   // Browser versucht Download zu erzwingen
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+  }
+</script>
+
+<script type="module">
+  import { setupAuthUI } from "./auth.js";
+  setupAuthUI();
+</script>
+
+</body>
+</html>
