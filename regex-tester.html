@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Regex-Tester — BRETT</title>
+
+<link rel="stylesheet" href="style3.css">
+<style>
+  .tool-panel{
+    background:linear-gradient(180deg, var(--char-2), var(--char));
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:32px;
+    margin-top:30px;
+    max-width:820px;
+  }
+  .field{ margin-bottom:20px; }
+  .field label{
+    display:block; font-size:0.82rem; font-weight:600;
+    color:var(--ash); margin-bottom:8px; letter-spacing:0.02em;
+  }
+  input[type="text"], textarea{
+    width:100%;
+    background:var(--void);
+    border:1px solid var(--line);
+    color:var(--paper);
+    font-family:'Courier New', monospace;
+    font-size:0.9rem;
+    padding:11px 14px;
+    border-radius:8px;
+    outline:none;
+    transition:border-color .2s ease;
+  }
+  input:focus, textarea:focus{ border-color:var(--ember); }
+  .regex-row{ display:flex; gap:12px; }
+  .regex-row input#pattern{ flex:1; }
+  .regex-row input#flags{ width:90px; }
+  .status{ margin-top:10px; font-size:0.85rem; }
+  .status.ok{ color:var(--glow); }
+  .status.err{ color:#ff6b6b; }
+  mark{ background:var(--ember); color:var(--void); padding:0 2px; border-radius:3px; }
+  #result{
+    margin-top:10px;
+    white-space:pre-wrap;
+    background:var(--void);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:14px;
+    font-family:'Courier New', monospace;
+    font-size:0.9rem;
+    color:var(--paper);
+    line-height:1.6;
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="nav-wrap">
+    <div class="brand"><span class="mark">BRETT</span><span class="tag">We know</span></div>
+    <nav class="links">
+      <a href="mainpage.html">Willkommen</a>
+      <a href="downloadcenter_new.html">Downloads</a>
+      <a href="Online-tools.html" class="active">Onlinetools</a>
+      <a href="Lizenz.html">Lizenz</a>
+      <a href="brett-spiele.html">Spiele</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <a class="back-link" href="Online-tools.html">Zurück zu Onlinetools</a>
+  <span class="eyebrow">Onlinetool</span>
+  <h1 class="page-title">Regex-Tester</h1>
+  <p class="lede">Regulären Ausdruck gegen einen Text testen, Treffer werden hervorgehoben.</p>
+
+  <div class="tool-panel">
+    <div class="field">
+      <label>Regex</label>
+      <div class="regex-row">
+        <input type="text" id="pattern" placeholder="z. B. [A-Z][a-z]+" />
+        <input type="text" id="flags" placeholder="Flags (gi)" value="g" />
+      </div>
+      <p id="status" class="status"></p>
+    </div>
+
+    <div class="field">
+      <label for="testText">Testtext</label>
+      <textarea id="testText" rows="8">Notizbrett, Musikbrett, Zeichenbrett und BrettBrowser sind Teil von BRETT.</textarea>
+    </div>
+
+    <div id="result"></div>
+  </div>
+</main>
+
+<script>
+  const pattern = document.getElementById('pattern');
+  const flags = document.getElementById('flags');
+  const testText = document.getElementById('testText');
+  const status = document.getElementById('status');
+  const result = document.getElementById('result');
+
+  function escapeHtml(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function run() {
+    const p = pattern.value;
+    const f = flags.value;
+    const text = testText.value;
+    if (!p) { result.innerHTML = ''; status.textContent = ''; return; }
+
+    try {
+      const re = new RegExp(p, f);
+      let matchCount = 0;
+      let out = '';
+      let lastIndex = 0;
+      const globalRe = new RegExp(p, f.includes('g') ? f : f + 'g');
+      let m;
+      while ((m = globalRe.exec(text)) !== null) {
+        matchCount++;
+        out += escapeHtml(text.slice(lastIndex, m.index));
+        out += '<mark>' + escapeHtml(m[0]) + '</mark>';
+        lastIndex = m.index + (m[0].length || 1);
+        if (m[0].length === 0) globalRe.lastIndex++;
+        if (matchCount > 5000) break;
+      }
+      out += escapeHtml(text.slice(lastIndex));
+      result.innerHTML = out;
+      status.textContent = matchCount + ' Treffer';
+      status.className = 'status ok';
+    } catch (e) {
+      status.textContent = 'Fehler: ' + e.message;
+      status.className = 'status err';
+      result.innerHTML = '';
+    }
+  }
+
+  pattern.addEventListener('input', run);
+  flags.addEventListener('input', run);
+  testText.addEventListener('input', run);
+  run();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rechner — BRETT</title>
+<link rel="stylesheet" href="style3.css">
+<style>
+  .calc{
+    max-width:320px; margin:30px auto 0;
+    background:linear-gradient(180deg, var(--char-2), var(--char));
+    border:1px solid var(--line); border-radius:var(--radius);
+    padding:22px;
+  }
+  #display{
+    background:var(--void); border:1px solid var(--line); border-radius:8px;
+    color:var(--paper); font-family:'Rajdhani',sans-serif; font-weight:700;
+    font-size:2rem; text-align:right; padding:18px 16px; margin-bottom:16px;
+    overflow-x:auto; white-space:nowrap;
+  }
+  .keys{ display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; }
+  .keys button{
+    padding:16px 0; border-radius:8px; border:none; cursor:pointer;
+    font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1.1rem;
+    background:var(--void); color:var(--paper); border:1px solid var(--line);
+    transition:transform .15s ease, background .15s ease;
+  }
+  .keys button:hover{ transform:translateY(-2px); }
+  .keys button.op{ color:var(--void); background:linear-gradient(135deg, var(--glow), var(--ember)); border:none; }
+  .keys button.wide{ grid-column:span 2; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="nav-wrap">
+    <div class="brand"><span class="mark">BRETT</span><span class="tag">We know</span></div>
+    <nav class="links">
+      <a href="mainpage.html">Willkommen</a>
+      <a href="downloadcenter_new.html">Downloads</a>
+      <a href="Online-tools.html" class="active">Onlinetools</a>
+      <a href="Lizenz.html">Lizenz</a>
+      <a href="brett-spiele.html">Spiele</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <a class="back-link" href="Online-tools.html">Zurück zu Onlinetools</a>
+  <span class="eyebrow">Onlinetool</span>
+  <h1 class="page-title">Rechner</h1>
+  <p class="lede">Einfacher Taschenrechner für die Zwischendurch-Rechnung.</p>
+
+  <div class="calc">
+    <div id="display">0</div>
+    <div class="keys">
+      <button onclick="clearAll()">C</button>
+      <button onclick="backspace()">⌫</button>
+      <button onclick="inputOp('%')">%</button>
+      <button class="op" onclick="inputOp('/')">÷</button>
+
+      <button onclick="inputNum('7')">7</button>
+      <button onclick="inputNum('8')">8</button>
+      <button onclick="inputNum('9')">9</button>
+      <button class="op" onclick="inputOp('*')">×</button>
+
+      <button onclick="inputNum('4')">4</button>
+      <button onclick="inputNum('5')">5</button>
+      <button onclick="inputNum('6')">6</button>
+      <button class="op" onclick="inputOp('-')">−</button>
+
+      <button onclick="inputNum('1')">1</button>
+      <button onclick="inputNum('2')">2</button>
+      <button onclick="inputNum('3')">3</button>
+      <button class="op" onclick="inputOp('+')">+</button>
+
+      <button class="wide" onclick="inputNum('0')">0</button>
+      <button onclick="inputNum('.')">.</button>
+      <button class="op" onclick="calculate()">=</button>
+    </div>
+  </div>
+</main>
+
+<script>
+  const display = document.getElementById('display');
+  let expr = '';
+
+  function render() {
+    display.textContent = expr
+      .replace(/\*/g, '×').replace(/\//g, '÷') || '0';
+  }
+
+  function clearAll() { expr = ''; render(); }
+  function backspace() { expr = expr.slice(0, -1); render(); }
+
+  function inputNum(n) {
+    if (n === '.' ) {
+      const parts = expr.split(/[+\-*/%]/);
+      if (parts[parts.length - 1].includes('.')) return;
+    }
+    expr += n;
+    render();
+  }
+
+  function inputOp(op) {
+    if (expr === '' && op !== '-') return;
+    const last = expr.slice(-1);
+    if ('+-*/%'.includes(last)) expr = expr.slice(0, -1);
+    expr += op;
+    render();
+  }
+
+  function calculate() {
+    if (!expr) return;
+    try {
+      if (!/^[0-9+\-*/%.() ]+$/.test(expr)) throw new Error('invalid');
+      const result = Function('"use strict"; return (' + expr + ')')();
+      expr = String(Math.round(result * 1e10) / 1e10);
+      render();
+    } catch (e) {
+      display.textContent = 'Fehler';
+      expr = '';
+    }
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (/[0-9.]/.test(e.key)) inputNum(e.key);
+    else if ('+-*/%'.includes(e.key)) inputOp(e.key);
+    else if (e.key === 'Enter' || e.key === '=') { e.preventDefault(); calculate(); }
+    else if (e.key === 'Backspace') backspace();
+    else if (e.key === 'Escape') clearAll();
+  });
+</script>
+
+</body>
+</html>

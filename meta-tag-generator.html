@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meta-Tag-Generator — BRETT</title>
+<link rel="stylesheet" href="style3.css">
+<style>
+  .tool-panel{
+    background:linear-gradient(180deg, var(--char-2), var(--char));
+    border:1px solid var(--line); border-radius:var(--radius);
+    padding:32px; margin-top:26px; max-width:720px;
+  }
+  .field{ margin-bottom:18px; }
+  .field label{ display:block; font-size:0.82rem; font-weight:600; color:var(--ash); margin-bottom:8px; }
+  input[type="text"], textarea{
+    width:100%; background:var(--void); border:1px solid var(--line); color:var(--paper);
+    font-family:'Inter', sans-serif; font-size:0.9rem; padding:11px 14px; border-radius:8px; outline:none;
+  }
+  textarea{ resize:vertical; }
+  .tool-btn{
+    font-family:'Rajdhani',sans-serif; font-weight:700; font-size:0.95rem;
+    padding:12px 26px; border-radius:8px; border:none; cursor:pointer;
+    color:var(--void); background:linear-gradient(135deg, var(--glow), var(--ember));
+    box-shadow:0 10px 24px -10px rgba(255,90,31,0.55);
+    transition:transform .2s ease;
+  }
+  .tool-btn:hover{ transform:translateY(-2px); }
+  #output{
+    margin-top:20px; width:100%; min-height:220px;
+    background:var(--void); border:1px solid var(--line); color:var(--paper);
+    font-family:'Courier New', monospace; font-size:0.82rem; padding:14px; border-radius:8px;
+    resize:vertical; line-height:1.6;
+  }
+  .copy-btn{
+    margin-top:10px; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:0.88rem;
+    padding:9px 20px; border-radius:8px; border:none; cursor:pointer;
+    color:var(--void); background:linear-gradient(135deg, var(--glow), var(--ember));
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="nav-wrap">
+    <div class="brand"><span class="mark">BRETT</span><span class="tag">We know</span></div>
+    <nav class="links">
+      <a href="mainpage.html">Willkommen</a>
+      <a href="downloadcenter_new.html">Downloads</a>
+      <a href="Online-tools.html" class="active">Onlinetools</a>
+      <a href="Lizenz.html">Lizenz</a>
+      <a href="brett-spiele.html">Spiele</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <a class="back-link" href="Online-tools.html">Zurück zu Onlinetools</a>
+  <span class="eyebrow">Onlinetool</span>
+  <h1 class="page-title">Meta-Tag-Generator</h1>
+  <p class="lede">SEO- und OpenGraph-Meta-Tags aus ein paar Angaben erzeugen.</p>
+
+  <div class="tool-panel">
+    <div class="field">
+      <label for="title">Seitentitel</label>
+      <input type="text" id="title" placeholder="z. B. BRETT — We know" value="BRETT">
+    </div>
+    <div class="field">
+      <label for="desc">Beschreibung</label>
+      <textarea id="desc" rows="3" placeholder="Kurze Beschreibung der Seite...">Die BRETT-Webseite.</textarea>
+    </div>
+    <div class="field">
+      <label for="url">URL</label>
+      <input type="text" id="url" placeholder="https://beispiel.de" value="https://brett2025brett.github.io/BrettWebsite/">
+    </div>
+    <div class="field">
+      <label for="image">Vorschaubild-URL (optional)</label>
+      <input type="text" id="image" placeholder="https://beispiel.de/bild.png">
+    </div>
+    <div class="field">
+      <label for="siteName">Seitenname (optional)</label>
+      <input type="text" id="siteName" placeholder="BRETT">
+    </div>
+
+    <button class="tool-btn" onclick="generateTags()">Tags generieren</button>
+
+    <textarea id="output" readonly></textarea>
+    <button class="copy-btn" onclick="copyOutput()">Kopieren</button>
+  </div>
+</main>
+
+<script>
+  function escapeAttr(str) {
+    return (str || '').replace(/"/g, '&quot;');
+  }
+
+  function generateTags() {
+    const title = document.getElementById('title').value || 'Titel';
+    const desc = document.getElementById('desc').value || '';
+    const url = document.getElementById('url').value || '';
+    const image = document.getElementById('image').value || '';
+    const siteName = document.getElementById('siteName').value || '';
+
+    let lines = [];
+    lines.push(`<title>${title}</title>`);
+    lines.push(`<meta name="description" content="${escapeAttr(desc)}">`);
+    if (url) lines.push(`<link rel="canonical" href="${escapeAttr(url)}">`);
+    lines.push('');
+    lines.push(`<meta property="og:title" content="${escapeAttr(title)}">`);
+    lines.push(`<meta property="og:description" content="${escapeAttr(desc)}">`);
+    lines.push(`<meta property="og:type" content="website">`);
+    if (url) lines.push(`<meta property="og:url" content="${escapeAttr(url)}">`);
+    if (image) lines.push(`<meta property="og:image" content="${escapeAttr(image)}">`);
+    if (siteName) lines.push(`<meta property="og:site_name" content="${escapeAttr(siteName)}">`);
+    lines.push('');
+    lines.push(`<meta name="twitter:card" content="${image ? 'summary_large_image' : 'summary'}">`);
+    lines.push(`<meta name="twitter:title" content="${escapeAttr(title)}">`);
+    lines.push(`<meta name="twitter:description" content="${escapeAttr(desc)}">`);
+    if (image) lines.push(`<meta name="twitter:image" content="${escapeAttr(image)}">`);
+
+    document.getElementById('output').value = lines.join('\n');
+  }
+
+  function copyOutput() {
+    navigator.clipboard.writeText(document.getElementById('output').value);
+  }
+
+  generateTags();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lorem-Ipsum-Generator — BRETT</title>
+<link rel="stylesheet" href="style3.css">
+<style>
+  .tool-panel{
+    background:linear-gradient(180deg, var(--char-2), var(--char));
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:32px;
+    margin-top:30px;
+    max-width:760px;
+  }
+  .field{ margin-bottom:20px; }
+  .field label{
+    display:block; font-size:0.82rem; font-weight:600;
+    color:var(--ash); margin-bottom:8px; letter-spacing:0.02em;
+  }
+  select, input[type="number"]{
+    background:var(--void);
+    border:1px solid var(--line);
+    color:var(--paper);
+    font-family:'Inter', sans-serif;
+    font-size:0.92rem;
+    padding:10px 14px;
+    border-radius:8px;
+    outline:none;
+  }
+  .row{ display:flex; gap:16px; flex-wrap:wrap; align-items:flex-end; }
+  .tool-btn{
+    font-family:'Rajdhani',sans-serif; font-weight:700; font-size:0.95rem;
+    letter-spacing:0.02em;
+    padding:11px 24px; border-radius:8px; border:none; cursor:pointer;
+    color:var(--void);
+    background:linear-gradient(135deg, var(--glow), var(--ember));
+    box-shadow:0 10px 24px -10px rgba(255,90,31,0.55);
+  }
+  .copy-btn{
+    background:none; border:1px solid var(--line); color:var(--ash);
+    border-radius:6px; padding:8px 14px; font-size:0.8rem; cursor:pointer;
+  }
+  .copy-btn:hover{ border-color:var(--ember); color:var(--glow); }
+  textarea{
+    width:100%;
+    margin-top:20px;
+    background:var(--void);
+    border:1px solid var(--line);
+    color:var(--paper);
+    font-family:'Inter', sans-serif;
+    font-size:0.92rem;
+    padding:14px;
+    border-radius:8px;
+    line-height:1.6;
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="nav-wrap">
+    <div class="brand"><span class="mark">BRETT</span><span class="tag">We know</span></div>
+    <nav class="links">
+      <a href="mainpage.html">Willkommen</a>
+      <a href="downloadcenter_new.html">Downloads</a>
+      <a href="Online-tools.html" class="active">Onlinetools</a>
+      <a href="Lizenz.html">Lizenz</a>
+      <a href="brett-spiele.html">Spiele</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <a class="back-link" href="Online-tools.html">Zurück zu Onlinetools</a>
+  <span class="eyebrow">Onlinetool</span>
+  <h1 class="page-title">Lorem-Ipsum-Generator</h1>
+  <p class="lede">Platzhaltertext für Designs und Layouts generieren.</p>
+
+  <div class="tool-panel">
+    <div class="row">
+      <div class="field">
+        <label for="count">Anzahl</label>
+        <input type="number" id="count" value="3" min="1" max="50">
+      </div>
+      <div class="field">
+        <label for="unit">Einheit</label>
+        <select id="unit">
+          <option value="paragraphs">Absätze</option>
+          <option value="sentences">Sätze</option>
+          <option value="words">Wörter</option>
+        </select>
+      </div>
+      <button class="tool-btn" onclick="generate()">Generieren</button>
+      <button class="copy-btn" onclick="copyText()">Kopieren</button>
+    </div>
+
+    <textarea id="output" rows="14" readonly></textarea>
+  </div>
+</main>
+
+<script>
+  const words = "lorem ipsum dolor sit amet consetetur sadipscing elitr sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat sed diam voluptua at vero eos et accusam et justo duo dolores et ea rebum stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet lorem ipsum dolor sit amet consetetur sadipscing elitr sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat sed diam voluptua at vero eos et accusam et justo duo dolores et ea rebum stet clita kasd gubergren no sea takimata sanctus est Lorem ipsum dolor sit amet".split(' ');
+
+  function randWord() {
+    return words[Math.floor(Math.random() * words.length)];
+  }
+
+  function makeSentence(minW = 6, maxW = 14) {
+    const len = minW + Math.floor(Math.random() * (maxW - minW));
+    const arr = [];
+    for (let i = 0; i < len; i++) arr.push(randWord());
+    let s = arr.join(' ');
+    return s.charAt(0).toUpperCase() + s.slice(1) + '.';
+  }
+
+  function makeParagraph() {
+    const sentences = 3 + Math.floor(Math.random() * 4);
+    const arr = [];
+    for (let i = 0; i < sentences; i++) arr.push(makeSentence());
+    return arr.join(' ');
+  }
+
+  function generate() {
+    const count = parseInt(document.getElementById('count').value) || 1;
+    const unit = document.getElementById('unit').value;
+    let out = '';
+
+    if (unit === 'paragraphs') {
+      const paras = [];
+      for (let i = 0; i < count; i++) paras.push(makeParagraph());
+      out = paras.join('\n\n');
+    } else if (unit === 'sentences') {
+      const sents = [];
+      for (let i = 0; i < count; i++) sents.push(makeSentence());
+      out = sents.join(' ');
+    } else {
+      const arr = [];
+      for (let i = 0; i < count; i++) arr.push(randWord());
+      out = arr.join(' ') + '.';
+      out = out.charAt(0).toUpperCase() + out.slice(1);
+    }
+
+    document.getElementById('output').value = out;
+  }
+
+  function copyText() {
+    const el = document.getElementById('output');
+    el.select();
+    navigator.clipboard.writeText(el.value);
+  }
+
+  generate();
+</script>
+
+</body>
+</html>

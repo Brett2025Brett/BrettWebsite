@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UUID-Generator — BRETT</title>
+<link rel="stylesheet" href="style3.css">
+<style>
+  .tool-panel{
+    background:linear-gradient(180deg, var(--char-2), var(--char));
+    border:1px solid var(--line); border-radius:var(--radius);
+    padding:32px; margin-top:26px; max-width:640px;
+  }
+  .field{ margin-bottom:20px; }
+  .field label{ display:block; font-size:0.82rem; font-weight:600; color:var(--ash); margin-bottom:8px; }
+  input[type="number"]{
+    width:120px; background:var(--void); border:1px solid var(--line); color:var(--paper);
+    font-family:'Inter', sans-serif; font-size:0.92rem; padding:10px 12px; border-radius:8px; outline:none;
+  }
+  .tool-btn{
+    font-family:'Rajdhani',sans-serif; font-weight:700; font-size:0.95rem;
+    padding:12px 26px; border-radius:8px; border:none; cursor:pointer;
+    color:var(--void); background:linear-gradient(135deg, var(--glow), var(--ember));
+    box-shadow:0 10px 24px -10px rgba(255,90,31,0.55);
+    transition:transform .2s ease;
+  }
+  .tool-btn:hover{ transform:translateY(-2px); }
+  .uuid-row{
+    display:flex; justify-content:space-between; align-items:center; gap:12px;
+    padding:12px 0; border-bottom:1px solid var(--line);
+    font-family:'Courier New', monospace; font-size:0.9rem; color:var(--paper);
+  }
+  .copy-btn{
+    background:none; border:1px solid var(--line); color:var(--ash);
+    border-radius:6px; padding:5px 10px; font-size:0.75rem; cursor:pointer; flex-shrink:0;
+    transition:border-color .2s ease, color .2s ease;
+  }
+  .copy-btn:hover{ border-color:var(--ember); color:var(--glow); }
+  #uuidList{ margin-top:10px; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="nav-wrap">
+    <div class="brand"><span class="mark">BRETT</span><span class="tag">We know</span></div>
+    <nav class="links">
+      <a href="mainpage.html">Willkommen</a>
+      <a href="downloadcenter_new.html">Downloads</a>
+      <a href="Online-tools.html" class="active">Onlinetools</a>
+      <a href="Lizenz.html">Lizenz</a>
+      <a href="brett-spiele.html">Spiele</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <a class="back-link" href="Online-tools.html">Zurück zu Onlinetools</a>
+  <span class="eyebrow">Onlinetool</span>
+  <h1 class="page-title">UUID-Generator</h1>
+  <p class="lede">Zufällige UUIDs (Version 4) erstellen.</p>
+
+  <div class="tool-panel">
+    <div class="field">
+      <label for="count">Anzahl</label>
+      <input type="number" id="count" value="5" min="1" max="100">
+    </div>
+
+    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+      <button class="tool-btn" onclick="generateUUIDs()">Generieren</button>
+      <button class="tool-btn" style="background:var(--void); color:var(--ash); border:1px solid var(--line); box-shadow:none;" onclick="copyAll()">Alle kopieren</button>
+    </div>
+
+    <div id="uuidList"></div>
+  </div>
+</main>
+
+<script>
+  function uuidv4() {
+    if (crypto.randomUUID) return crypto.randomUUID();
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+      const r = Math.random() * 16 | 0;
+      const v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+
+  let currentUUIDs = [];
+
+  function generateUUIDs() {
+    const n = Math.max(1, Math.min(100, parseInt(document.getElementById('count').value) || 1));
+    currentUUIDs = Array.from({length: n}, uuidv4);
+    render();
+  }
+
+  function render() {
+    const list = document.getElementById('uuidList');
+    list.innerHTML = currentUUIDs.map(id => `
+      <div class="uuid-row">
+        <span>${id}</span>
+        <button class="copy-btn" onclick="navigator.clipboard.writeText('${id}')">Kopieren</button>
+      </div>
+    `).join('');
+  }
+
+  function copyAll() {
+    if (!currentUUIDs.length) return;
+    navigator.clipboard.writeText(currentUUIDs.join('\n'));
+  }
+
+  generateUUIDs();
+</script>
+
+</body>
+</html>
