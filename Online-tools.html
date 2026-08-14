@@ -28,99 +28,74 @@
   <h1 class="page-title">Onlinetools</h1>
   <p class="lede">Ihr kennt bestimmt noch unsere tollen Onlinetools! Sie sind nützliche Tools, die man ganz einfach online hier ausführen kann. Es sind eigentlich die alten, nur mit neuem Design. Es kommen laufend welche dazu.</p>
 
-  <div class="grid">
-    <div class="card">
-      <span class="num">TOOL</span>
-      <h3>Unicode Explorer</h3>
-      <p>Zeichen, Codepoints und Symbole durchsuchen.</p>
-      <a class="btn" href="unicode-explorer.html">Ausführen</a>
-    </div>
-    <div class="card">
-      <span class="num">TOOL</span>
-      <h3>PasswortRandom</h3>
-      <p>Sichere Passwörter in wenigen Klicks erstellen.</p>
-      <a class="btn" href="passwort-generator.html">Ausführen</a>
-    </div>
-    <div class="card">
-      <span class="num">TOOL</span>
-      <h3>SuperRandom</h3>
-      <p>Zufällige Zeichenketten mit eigenem Zeichenvorrat.</p>
-      <a class="btn" href="zufallsstring-generator.html">Ausführen</a>
-    </div>
-    <div class="card">
-      <span class="num">TOOL</span>
-      <h3>Brett Lernen</h3>
-      <p>Multi-Sprachen-Playground: HTML, JS, Python, Lua & Ruby.</p>
-      <a class="btn" href="multi-sprachen-editor.html">Ausführen</a>
-    </div>
-    <div class="card">
-      <span class="num">TOOL</span>
-      <h3>BrettHTMLeditor Pro</h3>
-      <p>HTML direkt im Browser schreiben und live testen.</p>
-      <a class="btn" href="html-editor.html">Ausführen</a>
-    </div>
-    <div class="card">
-      <span class="num">TOOL</span>
-      <h3>XAPK zu APK Konverter</h3>
-      <p>XAPK-Dateien direkt im Browser zu APK entpacken.</p>
-      <a class="btn" href="apk-konverter.html">Ausführen</a>
-    </div>
-    <div class="card">
-      <span class="num">TOOL</span>
-      <h3>Rechner</h3>
-      <p>Einfacher Taschenrechner für zwischendurch.</p>
-      <a class="btn" href="rechner.html">Ausführen</a>
-    </div>
-    <div class="card">
-      <span class="num">TOOL</span>
-      <h3>Datei-Converter</h3>
-      <p>Bilder oder Textdateien umwandeln.</p>
-      <a class="btn" href="datei-converter.html">Ausführen</a>
-    </div>
-    <div class="card">
-      <span class="num">TOOL</span>
-      <h3>CSS-Generator</h3>
-      <p>Grid- und Flexbox-Layouts einstellen, CSS kopieren.</p>
-      <a class="btn" href="css-generator.html">Ausführen</a>
-    </div>
-    <div class="card">
-      <span class="num">TOOL</span>
-      <h3>Regex-Tester</h3>
-      <p>Regulären Ausdruck gegen einen Text testen.</p>
-      <a class="btn" href="regex-tester.html">Ausführen</a>
-    </div>
-    <div class="card">
-      <span class="num">TOOL</span>
-      <h3>JSON-Formatter</h3>
-      <p>JSON validieren und lesbar formatieren.</p>
-      <a class="btn" href="json-formatter.html">Ausführen</a>
-    </div>
-    <div class="card">
-      <span class="num">TOOL</span>
-      <h3>UUID-Generator</h3>
-      <p>Zufällige UUIDs (Version 4) erstellen.</p>
-      <a class="btn" href="uuid-generator.html">Ausführen</a>
-    </div>
-    <div class="card">
-      <span class="num">TOOL</span>
-      <h3>Lorem-Ipsum-Generator</h3>
-      <p>Platzhaltertext in verschiedenen Längen erstellen.</p>
-      <a class="btn" href="lorem-ipsum-generator.html">Ausführen</a>
-    </div>
-    <div class="card">
-      <span class="num">TOOL</span>
-      <h3>Meta-Tag-Generator</h3>
-      <p>SEO- und OpenGraph-Meta-Tags erzeugen.</p>
-      <a class="btn" href="meta-tag-generator.html">Ausführen</a>
-    </div>
-    <div class="card">
-      <span class="num">TOOL</span>
-      <h3>Text-Zähler</h3>
-      <p>Wörter, Zeichen und Absätze in einem Text zählen.</p>
-      <a class="btn" href="text-zaehler.html">Ausführen</a>
-    </div>
-  </div>
+  <div class="grid" id="tools-grid"></div>
 </main>
 
+<script>
+  // Diese Liste bestimmt, welche Onlinetools angezeigt werden.
+  const onlineTools = [
+    { name: "Unicode Explorer", description: "Zeichen, Codepoints und Symbole durchsuchen.", url: "unicode-explorer.html" },
+    { name: "PasswortRandom", description: "Sichere Passwörter in wenigen Klicks erstellen.", url: "passwort-generator.html" },
+    { name: "SuperRandom", description: "Zufällige Zeichenketten mit eigenem Zeichenvorrat.", url: "zufallsstring-generator.html" },
+    { name: "Brett Lernen", description: "Multi-Sprachen-Playground: HTML, JS, Python, Lua & Ruby.", url: "multi-sprachen-editor.html" },
+    { name: "BrettHTMLeditor Pro", description: "HTML direkt im Browser schreiben und live testen.", url: "html-editor.html" },
+    { name: "XAPK zu APK Konverter", description: "XAPK-Dateien direkt im Browser zu APK entpacken.", url: "apk-konverter.html" },
+    { name: "Rechner", description: "Einfacher Taschenrechner für zwischendurch.", url: "rechner.html" },
+    { name: "Datei-Converter", description: "Bilder oder Textdateien umwandeln.", url: "datei-converter.html" },
+    { name: "CSS-Generator", description: "Grid- und Flexbox-Layouts einstellen, CSS kopieren.", url: "css-generator.html" },
+    { name: "Regex-Tester", description: "Regulären Ausdruck gegen einen Text testen.", url: "regex-tester.html" },
+    { name: "JSON-Formatter", description: "JSON validieren und lesbar formatieren.", url: "json-formatter.html" },
+    { name: "UUID-Generator", description: "Zufällige UUIDs (Version 4) erstellen.", url: "uuid-generator.html" },
+    { name: "Lorem-Ipsum-Generator", description: "Platzhaltertext in verschiedenen Längen erstellen.", url: "lorem-ipsum-generator.html" },
+    { name: "Meta-Tag-Generator", description: "SEO- und OpenGraph-Meta-Tags erzeugen.", url: "meta-tag-generator.html" },
+    { name: "Text-Zähler", description: "Wörter, Zeichen und Absätze in einem Text zählen.", url: "text-zaehler.html" }
+  ];
+
+  function renderTools() {
+    const grid = document.getElementById("tools-grid");
+    grid.replaceChildren();
+
+    onlineTools.forEach((tool) => {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.tabIndex = 0;
+      card.setAttribute("role", "link");
+      card.setAttribute("aria-label", `${tool.name} öffnen`);
+
+      const num = document.createElement("span");
+      num.className = "num";
+      num.textContent = "TOOL";
+      const title = document.createElement("h3");
+      title.textContent = tool.name;
+      const description = document.createElement("p");
+      description.textContent = tool.description;
+      const button = document.createElement("a");
+      button.className = "btn";
+      button.href = tool.url;
+      button.textContent = "Ausführen";
+
+      card.append(num, title, description, button);
+
+      // Die komplette Karte ist klickbar. Der Button bleibt ein normaler Link.
+      card.addEventListener("click", (event) => {
+        if (!event.target.closest("a")) {
+          window.location.href = tool.url;
+        }
+      });
+
+      // Tastaturbedienung für die gesamte Karte.
+      card.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          window.location.href = tool.url;
+        }
+      });
+
+      grid.appendChild(card);
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", renderTools);
+</script>
 </body>
 </html>
